@@ -2,58 +2,144 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Health Dashboard - Oura + Strava</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg-primary: #0d0d0f;
+      --bg-secondary: #1a1a1f;
+      --bg-card: #1f1f24;
+      --bg-elevated: #2a2a30;
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0a8;
+      --text-muted: #6b6b73;
+      --accent-primary: #00d4aa;
+      --accent-secondary: #667eea;
+      --accent-tertiary: #ec4899;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --border: rgba(255,255,255,0.08);
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-      background: #f5f7fa;
-      min-height: 100vh;
-      color: #1a1a2e;
+    html {
+      scroll-behavior: smooth;
     }
 
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      min-height: 100vh;
+      color: var(--text-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Loading Skeleton Animation */
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-card) 50%, var(--bg-elevated) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: var(--radius-sm);
+    }
+
+    .skeleton-text {
+      height: 1em;
+      width: 60%;
+      margin: 0.5em 0;
+    }
+
+    .skeleton-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+    }
+
+    /* Smooth Transitions */
+    .fade-in {
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .slide-up {
+      animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Container */
     .container {
       max-width: 1400px;
       margin: 0 auto;
-      padding: 20px;
+      padding: 16px;
     }
 
+    @media (min-width: 768px) {
+      .container { padding: 24px; }
+    }
+
+    /* Header */
     header {
       text-align: center;
-      padding: 30px 0;
-      border-bottom: 1px solid #e0e4e8;
-      margin-bottom: 30px;
-      background: white;
-      margin: -20px -20px 30px -20px;
-      padding: 30px 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 24px 16px 32px;
+      position: relative;
     }
 
     header h1 {
-      font-size: 2.5rem;
-      background: linear-gradient(90deg, #667eea, #764ba2);
+      font-size: 1.75rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 10px;
+      background-clip: text;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    @media (min-width: 768px) {
+      header h1 { font-size: 2.25rem; }
     }
 
     header p {
-      color: #666;
-      font-size: 1.1rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
     }
 
+    /* Connection Status */
     .connection-status {
       display: flex;
       justify-content: center;
-      gap: 20px;
-      margin-bottom: 30px;
+      gap: 12px;
+      margin-bottom: 24px;
       flex-wrap: wrap;
     }
 
@@ -61,148 +147,475 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 12px 24px;
-      border-radius: 30px;
-      background: white;
-      border: 2px solid #e0e4e8;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      padding: 10px 18px;
+      border-radius: 50px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .status-badge:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
     }
 
     .status-badge.connected {
-      border-color: #10b981;
-      background: #ecfdf5;
+      border-color: var(--success);
+      background: rgba(16, 185, 129, 0.1);
     }
 
     .status-badge.disconnected {
-      border-color: #f87171;
-      background: #fef2f2;
+      border-color: var(--danger);
+      background: rgba(239, 68, 68, 0.1);
     }
 
     .status-dot {
-      width: 10px;
-      height: 10px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
+      animation: pulse 2s infinite;
     }
 
-    .status-dot.green { background: #10b981; }
-    .status-dot.red { background: #f87171; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .status-dot.green { background: var(--success); }
+    .status-dot.red { background: var(--danger); }
 
     .connect-btn {
-      background: linear-gradient(90deg, #667eea, #764ba2);
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
       border: none;
-      color: white;
-      padding: 8px 16px;
-      border-radius: 15px;
+      color: var(--bg-primary);
+      padding: 6px 14px;
+      border-radius: 20px;
       cursor: pointer;
       font-weight: 600;
-      margin-left: 10px;
-      transition: transform 0.2s, box-shadow 0.2s;
+      font-size: 0.8rem;
+      margin-left: 8px;
+      transition: all 0.2s ease;
     }
 
     .connect-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      transform: scale(1.05);
+      box-shadow: 0 4px 16px rgba(0, 212, 170, 0.3);
     }
 
-    /* Summary Cards */
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 30px;
+    .connect-btn:active {
+      transform: scale(0.98);
     }
 
-    .summary-card {
-      background: white;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      text-align: center;
-      border: 1px solid #e0e4e8;
+    /* Date Selector */
+    .date-selector {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      flex-wrap: wrap;
     }
 
-    .summary-card .label {
-      color: #666;
-      font-size: 0.8rem;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+    @media (min-width: 768px) {
+      .date-selector { gap: 16px; }
+    }
+
+    .date-selector label {
       font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      display: none;
     }
 
-    .summary-card .value {
-      font-size: 2.2rem;
-      font-weight: 700;
-      color: #1a1a2e;
+    @media (min-width: 768px) {
+      .date-selector label { display: block; }
     }
 
-    .summary-card .unit {
+    .date-selector input[type="date"] {
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
       font-size: 0.9rem;
-      color: #666;
-      font-weight: 400;
+      color: var(--text-primary);
+      background: var(--bg-elevated);
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
 
-    .summary-card .trend {
-      font-size: 0.8rem;
-      margin-top: 6px;
+    .date-selector input[type="date"]:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.2);
+    }
+
+    .date-nav-btn {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .date-nav-btn:hover {
+      background: var(--accent-primary);
+      color: var(--bg-primary);
+      border-color: var(--accent-primary);
+      transform: translateY(-1px);
+    }
+
+    .date-nav-btn:active {
+      transform: translateY(0);
+    }
+
+    .today-btn {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: var(--bg-primary);
+      border: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+
+    .today-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(0, 212, 170, 0.3);
+    }
+
+    /* Hero Score Cards - Radial Progress */
+    .hero-scores {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    @media (min-width: 768px) {
+      .hero-scores {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+      }
+    }
+
+    .score-ring-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 1px solid var(--border);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .score-ring-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .score-ring-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+      border-color: var(--accent-primary);
+    }
+
+    .score-ring-card:hover::before {
+      opacity: 1;
+    }
+
+    .score-ring-container {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      margin-bottom: 12px;
+    }
+
+    @media (min-width: 768px) {
+      .score-ring-container {
+        width: 120px;
+        height: 120px;
+      }
+    }
+
+    .score-ring-bg {
+      fill: none;
+      stroke: var(--bg-elevated);
+      stroke-width: 8;
+    }
+
+    .score-ring-progress {
+      fill: none;
+      stroke-width: 8;
+      stroke-linecap: round;
+      transform: rotate(-90deg);
+      transform-origin: center;
+      transition: stroke-dashoffset 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .score-ring-value {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .score-ring-value .number {
+      font-size: 1.75rem;
+      font-weight: 800;
+      display: block;
+      line-height: 1;
+    }
+
+    @media (min-width: 768px) {
+      .score-ring-value .number { font-size: 2rem; }
+    }
+
+    .score-ring-value .unit {
+      font-size: 0.7rem;
+      color: var(--text-muted);
       font-weight: 500;
     }
 
-    .trend.up { color: #10b981; }
-    .trend.down { color: #f87171; }
-    .trend.neutral { color: #666; }
+    .score-ring-card .label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
 
-    /* Score colors */
-    .score-excellent { color: #10b981; }
-    .score-good { color: #34d399; }
-    .score-fair { color: #fbbf24; }
-    .score-poor { color: #f87171; }
+    .score-ring-card .trend {
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 4px 8px;
+      border-radius: 20px;
+      background: var(--bg-elevated);
+    }
+
+    .trend.up { color: var(--success); background: rgba(16, 185, 129, 0.15); }
+    .trend.down { color: var(--danger); background: rgba(239, 68, 68, 0.15); }
+    .trend.neutral { color: var(--text-muted); }
+
+    /* Weekly Heat Map */
+    .weekly-heatmap {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: 20px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+    }
+
+    .heatmap-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .heatmap-header h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .heatmap-legend {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .legend-block {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+
+    .heatmap-day {
+      aspect-ratio: 1;
+      border-radius: var(--radius-sm);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .heatmap-day:hover {
+      transform: scale(1.1);
+      z-index: 1;
+    }
+
+    .heatmap-day .day-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .heatmap-day .day-score {
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .heatmap-day.excellent { background: rgba(16, 185, 129, 0.3); color: var(--success); }
+    .heatmap-day.good { background: rgba(52, 211, 153, 0.2); color: #34d399; }
+    .heatmap-day.fair { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .heatmap-day.poor { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+    .heatmap-day.empty { background: var(--bg-elevated); color: var(--text-muted); }
+
+    /* Quick Stats Bar */
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    @media (min-width: 768px) {
+      .quick-stats {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .quick-stat {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+
+    .quick-stat:hover {
+      border-color: var(--accent-secondary);
+      transform: translateY(-2px);
+    }
+
+    .quick-stat .stat-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .quick-stat .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .quick-stat .stat-unit {
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+    }
 
     /* Dashboard Grid */
     .dashboard-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-      margin-bottom: 30px;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
     }
 
-    @media (max-width: 1000px) {
+    @media (min-width: 1024px) {
       .dashboard-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
       }
     }
 
     .card {
-      background: white;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      border: 1px solid #e0e4e8;
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: 20px;
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(255,255,255,0.12);
     }
 
     .card h2 {
-      font-size: 1.1rem;
-      margin-bottom: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
       gap: 10px;
-      color: #1a1a2e;
+      color: var(--text-primary);
     }
 
     .card h2 .icon {
-      font-size: 1.3rem;
+      font-size: 1.1rem;
     }
 
     /* Charts */
     .chart-container {
       position: relative;
-      height: 250px;
+      height: 220px;
+    }
+
+    @media (min-width: 768px) {
+      .chart-container { height: 250px; }
     }
 
     /* Activity List */
     .activity-list {
-      max-height: 350px;
+      max-height: 400px;
       overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--bg-elevated) transparent;
+    }
+
+    .activity-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .activity-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .activity-list::-webkit-scrollbar-thumb {
+      background: var(--bg-elevated);
+      border-radius: 3px;
     }
 
     .activity-item {
@@ -210,27 +623,35 @@
       justify-content: space-between;
       align-items: center;
       padding: 14px 16px;
-      border-radius: 12px;
-      background: #f8fafc;
-      margin-bottom: 10px;
-      border: 1px solid #e0e4e8;
-      transition: transform 0.2s;
+      border-radius: var(--radius-md);
+      background: var(--bg-elevated);
+      margin-bottom: 8px;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      cursor: pointer;
     }
 
     .activity-item:hover {
       transform: translateX(4px);
-      background: #f1f5f9;
+      background: rgba(102, 126, 234, 0.1);
+      border-color: var(--accent-secondary);
+    }
+
+    .activity-item.highlighted {
+      background: rgba(0, 212, 170, 0.1);
+      border-color: var(--accent-primary);
     }
 
     .activity-info h3 {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
+      font-weight: 600;
       margin-bottom: 4px;
-      color: #1a1a2e;
+      color: var(--text-primary);
     }
 
     .activity-info p {
-      color: #666;
-      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-size: 0.75rem;
     }
 
     .activity-stats {
@@ -238,50 +659,71 @@
     }
 
     .activity-stats .distance {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #667eea;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent-primary);
     }
 
     .activity-stats .time {
-      color: #666;
-      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-size: 0.7rem;
     }
 
-    /* Detailed Metrics Section */
+    /* Metrics Section */
     .metrics-section {
-      margin-bottom: 30px;
+      margin-bottom: 24px;
     }
 
     .metrics-section h2 {
-      font-size: 1.3rem;
-      margin-bottom: 20px;
-      color: #1a1a2e;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text-primary);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .metrics-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 768px) {
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .metrics-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
     }
 
     .metric-card {
-      background: white;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      border: 1px solid #e0e4e8;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+
+    .metric-card:hover {
+      border-color: var(--accent-secondary);
     }
 
     .metric-card h3 {
-      font-size: 0.9rem;
-      color: #666;
-      margin-bottom: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.05em;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
     }
 
     .metric-row {
@@ -289,129 +731,140 @@
       justify-content: space-between;
       align-items: center;
       padding: 8px 0;
-      border-bottom: 1px solid #f1f5f9;
-    }
-
-    .metric-row:last-child {
-      border-bottom: none;
     }
 
     .metric-row .label {
-      color: #666;
-      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
     }
 
     .metric-row .value {
       font-weight: 600;
-      color: #1a1a2e;
+      color: var(--text-primary);
+      font-size: 0.85rem;
     }
 
     /* Sleep Stages */
     .sleep-stages {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 14px;
     }
 
     .sleep-stage {
-      flex: 1;
       text-align: center;
-      padding: 10px 8px;
-      border-radius: 8px;
-      font-size: 0.75rem;
+      padding: 10px 6px;
+      border-radius: var(--radius-sm);
+      font-size: 0.65rem;
+      font-weight: 600;
     }
 
-    .sleep-stage.deep { background: #c7d2fe; color: #4338ca; }
-    .sleep-stage.rem { background: #ddd6fe; color: #7c3aed; }
-    .sleep-stage.light { background: #e0e7ff; color: #4f46e5; }
-    .sleep-stage.awake { background: #fef3c7; color: #d97706; }
+    .sleep-stage.deep { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+    .sleep-stage.rem { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+    .sleep-stage.light { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .sleep-stage.awake { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
 
     .sleep-stage .stage-value {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 700;
       display: block;
+      margin-bottom: 2px;
     }
 
     /* Insights Section */
     .insights-section {
-      margin-top: 30px;
+      margin-bottom: 24px;
     }
 
     .insights-section h2 {
-      font-size: 1.3rem;
-      margin-bottom: 20px;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      color: #1a1a2e;
+      gap: 8px;
+      color: var(--text-primary);
     }
 
     .insights-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 16px;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 768px) {
+      .insights-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     .insight-card {
-      background: white;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      border: 1px solid #e0e4e8;
-      border-left: 4px solid #667eea;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent-secondary);
+      transition: all 0.3s ease;
+    }
+
+    .insight-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
     }
 
     .insight-card.positive {
-      border-left-color: #10b981;
-      background: linear-gradient(135deg, #ecfdf5 0%, white 100%);
+      border-left-color: var(--success);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, var(--bg-card) 100%);
     }
 
     .insight-card.negative {
-      border-left-color: #f87171;
-      background: linear-gradient(135deg, #fef2f2 0%, white 100%);
+      border-left-color: var(--danger);
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, var(--bg-card) 100%);
     }
 
     .insight-card.neutral {
-      border-left-color: #667eea;
-      background: linear-gradient(135deg, #eef2ff 0%, white 100%);
+      border-left-color: var(--accent-secondary);
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, var(--bg-card) 100%);
     }
 
     .insight-card h3 {
-      font-size: 1rem;
-      margin-bottom: 10px;
-      color: #1a1a2e;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
     }
 
     .insight-card p {
-      color: #666;
-      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
       line-height: 1.5;
     }
 
     .insight-card .recommendation {
       margin-top: 12px;
       padding-top: 12px;
-      border-top: 1px solid #e0e4e8;
+      border-top: 1px solid var(--border);
       font-weight: 500;
-      color: #1a1a2e;
-      font-size: 0.9rem;
+      color: var(--accent-primary);
+      font-size: 0.8rem;
     }
 
     /* Loading State */
     .loading {
       text-align: center;
       padding: 40px;
-      color: #666;
+      color: var(--text-muted);
     }
 
     .loading-spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid #e0e4e8;
-      border-top-color: #667eea;
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--bg-elevated);
+      border-top-color: var(--accent-primary);
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin: 0 auto 20px;
+      margin: 0 auto 16px;
     }
 
     @keyframes spin {
@@ -421,13 +874,14 @@
     /* Empty State */
     .empty-state {
       text-align: center;
-      padding: 40px;
-      color: #999;
+      padding: 40px 20px;
+      color: var(--text-muted);
     }
 
     .empty-state .icon {
-      font-size: 3rem;
-      margin-bottom: 15px;
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+      opacity: 0.5;
     }
 
     /* Full Width Card */
@@ -435,85 +889,7 @@
       grid-column: 1 / -1;
     }
 
-    /* Progress Bar */
-    .progress-bar {
-      height: 8px;
-      background: #e0e4e8;
-      border-radius: 4px;
-      overflow: hidden;
-      margin-top: 8px;
-    }
-
-    .progress-bar .fill {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 0.3s;
-    }
-
-    .progress-bar .fill.excellent { background: linear-gradient(90deg, #10b981, #34d399); }
-    .progress-bar .fill.good { background: linear-gradient(90deg, #34d399, #6ee7b7); }
-    .progress-bar .fill.fair { background: linear-gradient(90deg, #fbbf24, #fcd34d); }
-    .progress-bar .fill.poor { background: linear-gradient(90deg, #f87171, #fca5a5); }
-
-    /* Date Selector */
-    .date-selector {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      margin-bottom: 24px;
-      padding: 16px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-
-    .date-selector label {
-      font-weight: 600;
-      color: #666;
-    }
-
-    .date-selector input[type="date"] {
-      padding: 10px 16px;
-      border: 2px solid #e0e4e8;
-      border-radius: 8px;
-      font-size: 1rem;
-      color: #1a1a2e;
-      cursor: pointer;
-    }
-
-    .date-selector input[type="date"]:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-
-    .date-nav-btn {
-      background: #f8fafc;
-      border: 2px solid #e0e4e8;
-      padding: 10px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: all 0.2s;
-    }
-
-    .date-nav-btn:hover {
-      background: #667eea;
-      color: white;
-      border-color: #667eea;
-    }
-
-    .today-btn {
-      background: linear-gradient(90deg, #667eea, #764ba2);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    /* Activity Detail Modal */
+    /* Modal */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -521,10 +897,13 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(4px);
       z-index: 1000;
       justify-content: center;
       align-items: center;
+      padding: 16px;
+      animation: fadeIn 0.2s ease;
     }
 
     .modal-overlay.active {
@@ -532,85 +911,90 @@
     }
 
     .modal-content {
-      background: white;
-      border-radius: 16px;
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
       padding: 24px;
-      max-width: 600px;
-      width: 90%;
-      max-height: 80vh;
+      max-width: 500px;
+      width: 100%;
+      max-height: 85vh;
       overflow-y: auto;
       position: relative;
+      border: 1px solid var(--border);
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .modal-close {
       position: absolute;
       top: 16px;
       right: 16px;
-      background: none;
+      background: var(--bg-elevated);
       border: none;
-      font-size: 1.5rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      color: #666;
+      color: var(--text-secondary);
+      font-size: 1.2rem;
+      transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+      background: var(--danger);
+      color: white;
     }
 
     .modal-header {
       margin-bottom: 20px;
       padding-bottom: 16px;
-      border-bottom: 1px solid #e0e4e8;
+      border-bottom: 1px solid var(--border);
     }
 
     .modal-header h2 {
-      font-size: 1.3rem;
-      color: #1a1a2e;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
       margin-bottom: 4px;
     }
 
     .modal-header p {
-      color: #666;
-      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-size: 0.8rem;
     }
 
     .detail-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
+      gap: 12px;
     }
 
     .detail-item {
-      background: #f8fafc;
-      padding: 16px;
-      border-radius: 10px;
+      background: var(--bg-elevated);
+      padding: 14px;
+      border-radius: var(--radius-md);
     }
 
     .detail-item .label {
-      font-size: 0.75rem;
-      color: #666;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.05em;
       margin-bottom: 4px;
     }
 
     .detail-item .value {
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       font-weight: 700;
-      color: #1a1a2e;
+      color: var(--text-primary);
     }
 
     .detail-item .value .unit {
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       font-weight: 400;
-      color: #666;
-    }
-
-    /* Clickable activity items */
-    .activity-item {
-      cursor: pointer;
-    }
-
-    .activity-item:hover {
-      transform: translateX(4px);
-      background: #eef2ff;
-      border-color: #667eea;
+      color: var(--text-secondary);
     }
 
   </style>
@@ -619,7 +1003,7 @@
   <div class="container">
     <header>
       <h1>Health Dashboard</h1>
-      <p>Your unified view of Oura Ring + Strava data</p>
+      <p>Oura Ring + Strava unified view</p>
     </header>
 
     <div class="connection-status">
@@ -637,55 +1021,192 @@
 
     <!-- Date Selector -->
     <div class="date-selector">
-      <button class="date-nav-btn" id="prev-day">← Previous</button>
+      <button class="date-nav-btn" id="prev-day">&larr;</button>
       <label>View Date:</label>
       <input type="date" id="selected-date" />
       <button class="today-btn" id="today-btn">Today</button>
-      <button class="date-nav-btn" id="next-day">Next →</button>
+      <button class="date-nav-btn" id="next-day">&rarr;</button>
     </div>
 
-    <!-- Summary Cards -->
-    <div class="summary-grid" id="summary-cards">
-      <div class="summary-card">
+    <!-- Hero Score Cards with Radial Progress -->
+    <div class="hero-scores" id="hero-scores">
+      <div class="score-ring-card">
         <div class="label">Readiness</div>
-        <div class="value" id="readiness-score">--</div>
-        <div class="progress-bar"><div class="fill" id="readiness-bar" style="width: 0%"></div></div>
+        <div class="score-ring-container">
+          <svg viewBox="0 0 100 100">
+            <circle class="score-ring-bg" cx="50" cy="50" r="42"/>
+            <circle class="score-ring-progress" id="readiness-ring" cx="50" cy="50" r="42"
+                    stroke="url(#gradient-readiness)" stroke-dasharray="264" stroke-dashoffset="264"/>
+            <defs>
+              <linearGradient id="gradient-readiness" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#00d4aa"/>
+                <stop offset="100%" style="stop-color:#667eea"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="score-ring-value">
+            <span class="number" id="readiness-score">--</span>
+          </div>
+        </div>
         <div class="trend neutral" id="readiness-trend">Connect Oura</div>
       </div>
-      <div class="summary-card">
-        <div class="label">Sleep Score</div>
-        <div class="value" id="sleep-score">--</div>
-        <div class="progress-bar"><div class="fill" id="sleep-bar" style="width: 0%"></div></div>
+
+      <div class="score-ring-card">
+        <div class="label">Sleep</div>
+        <div class="score-ring-container">
+          <svg viewBox="0 0 100 100">
+            <circle class="score-ring-bg" cx="50" cy="50" r="42"/>
+            <circle class="score-ring-progress" id="sleep-ring" cx="50" cy="50" r="42"
+                    stroke="url(#gradient-sleep)" stroke-dasharray="264" stroke-dashoffset="264"/>
+            <defs>
+              <linearGradient id="gradient-sleep" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#667eea"/>
+                <stop offset="100%" style="stop-color:#ec4899"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="score-ring-value">
+            <span class="number" id="sleep-score">--</span>
+          </div>
+        </div>
         <div class="trend neutral" id="sleep-trend">Connect Oura</div>
       </div>
-      <div class="summary-card">
+
+      <div class="score-ring-card">
         <div class="label">HRV</div>
-        <div class="value" id="hrv-value">--<span class="unit">ms</span></div>
+        <div class="score-ring-container">
+          <svg viewBox="0 0 100 100">
+            <circle class="score-ring-bg" cx="50" cy="50" r="42"/>
+            <circle class="score-ring-progress" id="hrv-ring" cx="50" cy="50" r="42"
+                    stroke="url(#gradient-hrv)" stroke-dasharray="264" stroke-dashoffset="264"/>
+            <defs>
+              <linearGradient id="gradient-hrv" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#ec4899"/>
+                <stop offset="100%" style="stop-color:#f59e0b"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="score-ring-value">
+            <span class="number" id="hrv-value">--</span>
+            <span class="unit">ms</span>
+          </div>
+        </div>
         <div class="trend neutral" id="hrv-trend">Connect Oura</div>
       </div>
-      <div class="summary-card">
+
+      <div class="score-ring-card">
         <div class="label">Resting HR</div>
-        <div class="value" id="resting-hr">--<span class="unit">bpm</span></div>
+        <div class="score-ring-container">
+          <svg viewBox="0 0 100 100">
+            <circle class="score-ring-bg" cx="50" cy="50" r="42"/>
+            <circle class="score-ring-progress" id="hr-ring" cx="50" cy="50" r="42"
+                    stroke="url(#gradient-hr)" stroke-dasharray="264" stroke-dashoffset="264"/>
+            <defs>
+              <linearGradient id="gradient-hr" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#ef4444"/>
+                <stop offset="100%" style="stop-color:#f59e0b"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="score-ring-value">
+            <span class="number" id="resting-hr">--</span>
+            <span class="unit">bpm</span>
+          </div>
+        </div>
         <div class="trend neutral" id="hr-trend">Connect Oura</div>
       </div>
-      <div class="summary-card">
-        <div class="label">Weekly Distance</div>
-        <div class="value" id="weekly-distance">--<span class="unit">mi</span></div>
-        <div class="trend neutral" id="distance-trend">Connect Strava</div>
+    </div>
+
+    <!-- Weekly Heat Map -->
+    <div class="weekly-heatmap">
+      <div class="heatmap-header">
+        <h3>Weekly Overview</h3>
+        <div class="heatmap-legend">
+          <span>Poor</span>
+          <div class="legend-block" style="background: rgba(239, 68, 68, 0.3)"></div>
+          <div class="legend-block" style="background: rgba(245, 158, 11, 0.3)"></div>
+          <div class="legend-block" style="background: rgba(52, 211, 153, 0.3)"></div>
+          <div class="legend-block" style="background: rgba(16, 185, 129, 0.4)"></div>
+          <span>Excellent</span>
+        </div>
       </div>
-      <div class="summary-card">
-        <div class="label">Weekly Activities</div>
-        <div class="value" id="weekly-activities">--</div>
-        <div class="trend neutral" id="activities-trend">Connect Strava</div>
+      <div class="heatmap-grid" id="heatmap-grid">
+        <!-- Will be populated by JS -->
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats">
+      <div class="quick-stat">
+        <div class="stat-label">Weekly Distance</div>
+        <div class="stat-value" id="weekly-distance">--<span class="stat-unit"> mi</span></div>
+      </div>
+      <div class="quick-stat">
+        <div class="stat-label">Activities</div>
+        <div class="stat-value" id="weekly-activities">--</div>
+      </div>
+      <div class="quick-stat">
+        <div class="stat-label">Avg Sleep</div>
+        <div class="stat-value" id="avg-sleep">--<span class="stat-unit"> hrs</span></div>
+      </div>
+      <div class="quick-stat">
+        <div class="stat-label">Steps Today</div>
+        <div class="stat-value" id="daily-steps">--</div>
+      </div>
+    </div>
+
+    <!-- Main Dashboard Charts -->
+    <div class="dashboard-grid">
+      <!-- Sleep Chart -->
+      <div class="card">
+        <h2><span class="icon">Sleep Score</span></h2>
+        <div class="chart-container">
+          <canvas id="sleep-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Readiness Chart -->
+      <div class="card">
+        <h2><span class="icon">Readiness Score</span></h2>
+        <div class="chart-container">
+          <canvas id="readiness-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- HRV Chart -->
+      <div class="card">
+        <h2><span class="icon">HRV Trend</span></h2>
+        <div class="chart-container">
+          <canvas id="hrv-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Activity Chart -->
+      <div class="card">
+        <h2><span class="icon">Training Load</span></h2>
+        <div class="chart-container">
+          <canvas id="activity-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Recent Activities -->
+      <div class="card full-width">
+        <h2><span class="icon">Recent Activities</span></h2>
+        <div class="activity-list" id="activity-list">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading activities...</p>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Detailed Metrics -->
-    <div class="metrics-section" id="detailed-metrics">
-      <h2><span class="icon">📊</span> Detailed Metrics</h2>
+    <div class="metrics-section">
+      <h2>Detailed Metrics</h2>
       <div class="metrics-grid">
         <!-- Sleep Details -->
-        <div class="metric-card" id="sleep-details">
+        <div class="metric-card">
           <h3>Last Night's Sleep</h3>
           <div class="metric-row">
             <span class="label">Total Sleep</span>
@@ -699,7 +1220,7 @@
             <span class="label">Efficiency</span>
             <span class="value" id="sleep-efficiency">--</span>
           </div>
-          <div class="sleep-stages" id="sleep-stages">
+          <div class="sleep-stages">
             <div class="sleep-stage deep">
               <span class="stage-value" id="deep-sleep">--</span>
               Deep
@@ -720,7 +1241,7 @@
         </div>
 
         <!-- Readiness Contributors -->
-        <div class="metric-card" id="readiness-details">
+        <div class="metric-card">
           <h3>Readiness Contributors</h3>
           <div class="metric-row">
             <span class="label">Previous Night</span>
@@ -749,12 +1270,8 @@
         </div>
 
         <!-- Activity Summary -->
-        <div class="metric-card" id="activity-details">
-          <h3>Activity Summary (Oura)</h3>
-          <div class="metric-row">
-            <span class="label">Steps</span>
-            <span class="value" id="daily-steps">--</span>
-          </div>
+        <div class="metric-card">
+          <h3>Activity Summary</h3>
           <div class="metric-row">
             <span class="label">Active Calories</span>
             <span class="value" id="active-calories">--</span>
@@ -778,8 +1295,8 @@
         </div>
 
         <!-- Strava Stats -->
-        <div class="metric-card" id="strava-details">
-          <h3>Training Stats (Strava)</h3>
+        <div class="metric-card">
+          <h3>Training Stats</h3>
           <div class="metric-row">
             <span class="label">This Week Distance</span>
             <span class="value" id="strava-week-distance">--</span>
@@ -789,7 +1306,7 @@
             <span class="value" id="strava-week-time">--</span>
           </div>
           <div class="metric-row">
-            <span class="label">This Week Elevation</span>
+            <span class="label">Elevation Gain</span>
             <span class="value" id="strava-week-elevation">--</span>
           </div>
           <div class="metric-row">
@@ -808,55 +1325,9 @@
       </div>
     </div>
 
-    <!-- Main Dashboard Charts -->
-    <div class="dashboard-grid">
-      <!-- Sleep Chart -->
-      <div class="card">
-        <h2><span class="icon">😴</span> Sleep Score (Last 14 Days)</h2>
-        <div class="chart-container">
-          <canvas id="sleep-chart"></canvas>
-        </div>
-      </div>
-
-      <!-- Readiness Chart -->
-      <div class="card">
-        <h2><span class="icon">⚡</span> Readiness Score (Last 14 Days)</h2>
-        <div class="chart-container">
-          <canvas id="readiness-chart"></canvas>
-        </div>
-      </div>
-
-      <!-- HRV Chart -->
-      <div class="card">
-        <h2><span class="icon">💓</span> HRV Trend (Last 14 Days)</h2>
-        <div class="chart-container">
-          <canvas id="hrv-chart"></canvas>
-        </div>
-      </div>
-
-      <!-- Activity Chart -->
-      <div class="card">
-        <h2><span class="icon">🏃</span> Training Load (Weekly)</h2>
-        <div class="chart-container">
-          <canvas id="activity-chart"></canvas>
-        </div>
-      </div>
-
-      <!-- Recent Activities -->
-      <div class="card full-width">
-        <h2><span class="icon">📋</span> Recent Activities</h2>
-        <div class="activity-list" id="activity-list">
-          <div class="loading">
-            <div class="loading-spinner"></div>
-            <p>Loading activities...</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Insights Section -->
     <div class="insights-section">
-      <h2><span class="icon">💡</span> Insights & Recommendations</h2>
+      <h2>Insights & Recommendations</h2>
       <div class="insights-grid" id="insights-grid">
         <div class="insight-card neutral">
           <h3>Loading insights...</h3>
@@ -886,6 +1357,10 @@
     let ouraData = { sleep: [], readiness: [], activity: [], heartrate: [], sleepDetails: [] };
     let selectedDate = new Date();
 
+    // Chart.js dark theme defaults
+    Chart.defaults.color = '#a0a0a8';
+    Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
+
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
       checkStravaConnection();
@@ -894,13 +1369,10 @@
       document.getElementById('connect-strava').addEventListener('click', connectStrava);
       document.getElementById('connect-oura').addEventListener('click', connectOura);
 
-      // Initialize date selector
       initDateSelector();
-
-      // Initialize modal
       initModal();
+      initHeatmap();
 
-      // Check URL params for connection status
       const params = new URLSearchParams(window.location.search);
       if (params.get('strava') === 'connected') {
         updateStravaStatus(true);
@@ -914,6 +1386,76 @@
       }
     });
 
+    // Initialize Heatmap with empty state
+    function initHeatmap() {
+      const grid = document.getElementById('heatmap-grid');
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+      grid.innerHTML = days.map(day => `
+        <div class="heatmap-day empty">
+          <span class="day-label">${day}</span>
+          <span class="day-score">--</span>
+        </div>
+      `).join('');
+    }
+
+    // Update Heatmap with data
+    function updateHeatmap() {
+      const grid = document.getElementById('heatmap-grid');
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const today = new Date();
+
+      // Get last 7 days of readiness data
+      const weekData = [];
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = formatDateForInput(date);
+        const readiness = ouraData.readiness.find(r => r.day === dateStr);
+        weekData.push({
+          day: days[date.getDay()],
+          score: readiness?.score || null,
+          date: dateStr
+        });
+      }
+
+      grid.innerHTML = weekData.map(d => {
+        let className = 'empty';
+        if (d.score !== null) {
+          if (d.score >= 85) className = 'excellent';
+          else if (d.score >= 70) className = 'good';
+          else if (d.score >= 50) className = 'fair';
+          else className = 'poor';
+        }
+        return `
+          <div class="heatmap-day ${className}" onclick="selectDate('${d.date}')">
+            <span class="day-label">${d.day}</span>
+            <span class="day-score">${d.score !== null ? d.score : '--'}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectDate(dateStr) {
+      selectedDate = new Date(dateStr + 'T12:00:00');
+      document.getElementById('selected-date').value = dateStr;
+      updateDisplayForDate();
+    }
+
+    // Update Score Ring Animation
+    function updateScoreRing(ringId, score, maxScore = 100) {
+      const ring = document.getElementById(ringId);
+      if (!ring) return;
+
+      const circumference = 2 * Math.PI * 42; // r = 42
+      const offset = circumference - (score / maxScore) * circumference;
+
+      // Animate after a small delay for smooth entry
+      setTimeout(() => {
+        ring.style.strokeDashoffset = offset;
+      }, 100);
+    }
+
     // Date Selector Functions
     function initDateSelector() {
       const dateInput = document.getElementById('selected-date');
@@ -921,7 +1463,6 @@
       const nextBtn = document.getElementById('next-day');
       const todayBtn = document.getElementById('today-btn');
 
-      // Set initial date to today
       dateInput.value = formatDateForInput(selectedDate);
 
       dateInput.addEventListener('change', (e) => {
@@ -960,52 +1501,58 @@
     function updateOuraSummaryForDate(date) {
       const dateStr = formatDateForInput(date);
 
-      // Find data for selected date
       const readiness = ouraData.readiness.find(r => r.day === dateStr);
       const sleep = ouraData.sleep.find(s => s.day === dateStr);
       const sleepDetail = ouraData.sleepDetails.find(s => s.day === dateStr);
       const activity = ouraData.activity.find(a => a.day === dateStr);
 
-      // Update Readiness
+      // Update Readiness Ring
       if (readiness) {
         document.getElementById('readiness-score').textContent = readiness.score;
-        document.getElementById('readiness-score').className = 'value ' + getScoreClass(readiness.score);
-        document.getElementById('readiness-bar').style.width = readiness.score + '%';
-        document.getElementById('readiness-bar').className = 'fill ' + getBarClass(readiness.score);
-        document.getElementById('readiness-trend').textContent = dateStr === formatDateForInput(new Date()) ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        updateScoreRing('readiness-ring', readiness.score);
+        const trendText = dateStr === formatDateForInput(new Date()) ? 'Today' :
+          date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        document.getElementById('readiness-trend').textContent = trendText;
         document.getElementById('readiness-trend').className = 'trend neutral';
       } else {
         document.getElementById('readiness-score').textContent = '--';
-        document.getElementById('readiness-bar').style.width = '0%';
+        updateScoreRing('readiness-ring', 0);
         document.getElementById('readiness-trend').textContent = 'No data';
       }
 
-      // Update Sleep Score
+      // Update Sleep Ring
       if (sleep) {
         document.getElementById('sleep-score').textContent = sleep.score;
-        document.getElementById('sleep-score').className = 'value ' + getScoreClass(sleep.score);
-        document.getElementById('sleep-bar').style.width = sleep.score + '%';
-        document.getElementById('sleep-bar').className = 'fill ' + getBarClass(sleep.score);
-        document.getElementById('sleep-trend').textContent = dateStr === formatDateForInput(new Date()) ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        updateScoreRing('sleep-ring', sleep.score);
+        const trendText = dateStr === formatDateForInput(new Date()) ? 'Today' :
+          date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        document.getElementById('sleep-trend').textContent = trendText;
         document.getElementById('sleep-trend').className = 'trend neutral';
       } else {
         document.getElementById('sleep-score').textContent = '--';
-        document.getElementById('sleep-bar').style.width = '0%';
+        updateScoreRing('sleep-ring', 0);
         document.getElementById('sleep-trend').textContent = 'No data';
       }
 
-      // Update HRV and Resting HR
+      // Update HRV and HR Rings
       if (sleepDetail) {
         if (sleepDetail.average_hrv) {
-          document.getElementById('hrv-value').innerHTML = sleepDetail.average_hrv + '<span class="unit"> ms</span>';
-          document.getElementById('hrv-trend').textContent = dateStr === formatDateForInput(new Date()) ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+          document.getElementById('hrv-value').textContent = sleepDetail.average_hrv;
+          // HRV typically ranges 20-80, normalize to 100
+          updateScoreRing('hrv-ring', Math.min(sleepDetail.average_hrv, 100));
+          document.getElementById('hrv-trend').textContent = dateStr === formatDateForInput(new Date()) ? 'Today' :
+            date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
         }
         if (sleepDetail.lowest_heart_rate) {
-          document.getElementById('resting-hr').innerHTML = sleepDetail.lowest_heart_rate + '<span class="unit"> bpm</span>';
-          document.getElementById('hr-trend').textContent = dateStr === formatDateForInput(new Date()) ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+          document.getElementById('resting-hr').textContent = sleepDetail.lowest_heart_rate;
+          // Lower HR is better, invert for display (40-80 range)
+          const hrScore = Math.max(0, 100 - ((sleepDetail.lowest_heart_rate - 40) * 2.5));
+          updateScoreRing('hr-ring', hrScore);
+          document.getElementById('hr-trend').textContent = dateStr === formatDateForInput(new Date()) ? 'Today' :
+            date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
         }
 
-        // Update sleep details panel
+        // Update sleep details
         if (sleepDetail.total_sleep_duration) {
           document.getElementById('total-sleep').textContent = formatDuration(sleepDetail.total_sleep_duration);
         }
@@ -1028,8 +1575,10 @@
           document.getElementById('awake-time').textContent = formatDurationShort(sleepDetail.awake_time);
         }
       } else {
-        document.getElementById('hrv-value').innerHTML = '--<span class="unit"> ms</span>';
-        document.getElementById('resting-hr').innerHTML = '--<span class="unit"> bpm</span>';
+        document.getElementById('hrv-value').textContent = '--';
+        document.getElementById('resting-hr').textContent = '--';
+        updateScoreRing('hrv-ring', 0);
+        updateScoreRing('hr-ring', 0);
       }
 
       // Update activity summary
@@ -1042,14 +1591,6 @@
 
     function updateStravaForDate(date) {
       const dateStr = formatDateForInput(date);
-
-      // Find activities for selected date
-      const dayActivities = stravaData.activities.filter(a => {
-        const actDate = a.start_date_local.split('T')[0];
-        return actDate === dateStr;
-      });
-
-      // Update the activities list to show selected date's activities at top
       renderActivitiesWithHighlight(dateStr);
     }
 
@@ -1082,7 +1623,6 @@
       title.textContent = activity.name;
       subtitle.textContent = `${activity.type} • ${date}`;
 
-      // Convert metrics
       const distanceMi = (activity.distance / 1000 * 0.621371).toFixed(2);
       const elevationFt = activity.total_elevation_gain ? Math.round(activity.total_elevation_gain * 3.28084) : null;
       const avgSpeedMph = activity.average_speed ? (activity.average_speed * 2.237).toFixed(1) : null;
@@ -1172,15 +1712,6 @@
         `;
       }
 
-      if (activity.suffer_score) {
-        detailsHTML += `
-          <div class="detail-item">
-            <div class="label">Suffer Score</div>
-            <div class="value">${activity.suffer_score}</div>
-          </div>
-        `;
-      }
-
       details.innerHTML = detailsHTML;
       modal.classList.add('active');
     }
@@ -1193,7 +1724,6 @@
         return;
       }
 
-      // Sort activities to show highlighted date first
       const sorted = [...stravaData.activities].sort((a, b) => {
         const aDate = a.start_date_local.split('T')[0];
         const bDate = b.start_date_local.split('T')[0];
@@ -1202,7 +1732,7 @@
         return new Date(b.start_date_local) - new Date(a.start_date_local);
       });
 
-      list.innerHTML = sorted.slice(0, 15).map((activity, index) => {
+      list.innerHTML = sorted.slice(0, 15).map((activity) => {
         const actDate = activity.start_date_local.split('T')[0];
         const isHighlighted = actDate === highlightDate;
         const date = new Date(activity.start_date_local).toLocaleDateString('en-US', {
@@ -1213,39 +1743,28 @@
         const duration = Math.floor(activity.moving_time / 60);
         const type = activity.type;
 
-        const avgSpeedMph = activity.average_speed ? (activity.average_speed * 2.237).toFixed(1) : null;
-        const maxSpeedMph = activity.max_speed ? (activity.max_speed * 2.237).toFixed(1) : null;
         const pace = distanceMi > 0 ? ((activity.moving_time / 60) / distanceMi).toFixed(1) : '--';
-        const elevationFt = activity.total_elevation_gain ? Math.round(activity.total_elevation_gain * 3.28084) : null;
         const avgHR = activity.average_heartrate ? Math.round(activity.average_heartrate) : null;
         const maxHR = activity.max_heartrate ? Math.round(activity.max_heartrate) : null;
-        const avgPower = activity.average_watts ? Math.round(activity.average_watts) : null;
 
         let statsLine = '';
         if (type === 'Run' || type === 'Walk' || type === 'Hike') {
           statsLine = `${pace} min/mi`;
-          if (elevationFt) statsLine += ` • ${elevationFt} ft`;
         } else if (type === 'Ride' || type === 'VirtualRide') {
-          statsLine = `${avgSpeedMph} mph avg`;
-          if (maxSpeedMph) statsLine += ` / ${maxSpeedMph} max`;
-          if (elevationFt) statsLine += ` • ${elevationFt} ft`;
-          if (avgPower) statsLine += ` • ${avgPower}W`;
-        } else {
+          const avgSpeedMph = activity.average_speed ? (activity.average_speed * 2.237).toFixed(1) : null;
           if (avgSpeedMph) statsLine = `${avgSpeedMph} mph`;
         }
 
         let hrLine = '';
         if (avgHR && maxHR) {
-          hrLine = `${avgHR} / ${maxHR} bpm`;
-        } else if (avgHR) {
-          hrLine = `${avgHR} bpm avg`;
+          hrLine = ` • ${avgHR}/${maxHR} bpm`;
         }
 
         return `
-          <div class="activity-item${isHighlighted ? ' highlighted' : ''}" onclick="showActivityDetail(stravaData.activities.find(a => a.id === ${activity.id}))" style="${isHighlighted ? 'background: #eef2ff; border-color: #667eea;' : ''}">
+          <div class="activity-item ${isHighlighted ? 'highlighted' : ''}" onclick="showActivityDetail(stravaData.activities.find(a => a.id === ${activity.id}))">
             <div class="activity-info">
               <h3>${activity.name}</h3>
-              <p>${type} • ${date}${hrLine ? ' • ' + hrLine : ''}</p>
+              <p>${type} • ${date}${hrLine}</p>
             </div>
             <div class="activity-stats">
               <div class="distance">${distanceMi.toFixed(1)} mi</div>
@@ -1256,26 +1775,23 @@
       }).join('');
     }
 
-    // Connect Strava
+    // Connection Functions
     async function connectStrava() {
       const response = await fetch('/api/strava/auth-url');
       const data = await response.json();
       window.location.href = data.url;
     }
 
-    // Connect Oura
     async function connectOura() {
       const response = await fetch('/api/oura/auth-url');
       const data = await response.json();
       window.location.href = data.url;
     }
 
-    // Check Strava connection
     async function checkStravaConnection() {
       try {
         const response = await fetch('/api/strava/status');
         const data = await response.json();
-
         if (data.connected) {
           updateStravaStatus(true);
           loadStravaData();
@@ -1285,12 +1801,10 @@
       }
     }
 
-    // Check Oura connection
     async function checkOuraConnection() {
       try {
         const response = await fetch('/api/oura/status');
         const data = await response.json();
-
         if (data.connected) {
           updateOuraStatus(true);
           loadOuraData();
@@ -1305,7 +1819,7 @@
       if (connected) {
         badge.classList.remove('disconnected');
         badge.classList.add('connected');
-        badge.innerHTML = '<span class="status-dot green"></span><span>Strava Connected</span>';
+        badge.innerHTML = '<span class="status-dot green"></span><span>Strava</span>';
       }
     }
 
@@ -1314,7 +1828,7 @@
       if (connected) {
         badge.classList.remove('disconnected');
         badge.classList.add('connected');
-        badge.innerHTML = '<span class="status-dot green"></span><span>Oura Connected</span>';
+        badge.innerHTML = '<span class="status-dot green"></span><span>Oura</span>';
       } else {
         badge.classList.remove('connected');
         badge.classList.add('disconnected');
@@ -1322,7 +1836,7 @@
       }
     }
 
-    // Load Strava Data
+    // Data Loading
     async function loadStravaData() {
       try {
         const [activitiesRes, athleteRes] = await Promise.all([
@@ -1356,7 +1870,6 @@
       }
     }
 
-    // Load Oura Data
     async function loadOuraData() {
       try {
         const [sleepRes, readinessRes, activityRes, sleepDetailsRes] = await Promise.all([
@@ -1366,7 +1879,6 @@
           fetch('/api/oura/sleep-details')
         ]);
 
-        // Check if any request failed with 401 (token expired)
         if (sleepRes.status === 401 || readinessRes.status === 401) {
           console.log('Oura token expired, need to reconnect');
           updateOuraStatus(false);
@@ -1378,7 +1890,6 @@
         if (activityRes.ok) ouraData.activity = (await activityRes.json()).data || [];
         if (sleepDetailsRes.ok) ouraData.sleepDetails = (await sleepDetailsRes.json()).data || [];
 
-        // Check if we actually got data
         if (!ouraData.sleep.length && !ouraData.readiness.length) {
           console.log('No Oura data received');
           updateOuraStatus(false);
@@ -1391,6 +1902,8 @@
         renderHRVChart();
         updateOuraSummary();
         updateOuraDetails();
+        updateHeatmap();
+        updateAvgSleep();
         generateInsights();
       } catch (error) {
         console.error('Error loading Oura data:', error);
@@ -1398,18 +1911,22 @@
       }
     }
 
+    function updateAvgSleep() {
+      if (ouraData.sleepDetails && ouraData.sleepDetails.length >= 7) {
+        const recent = ouraData.sleepDetails.slice(-7);
+        const avgSeconds = recent.reduce((sum, d) => sum + (d.total_sleep_duration || 0), 0) / recent.length;
+        const hours = (avgSeconds / 3600).toFixed(1);
+        document.getElementById('avg-sleep').innerHTML = hours + '<span class="stat-unit"> hrs</span>';
+      }
+    }
+
     // Update Oura Summary Cards
     function updateOuraSummary() {
-      // Readiness Score
       if (ouraData.readiness.length) {
         const latest = ouraData.readiness[ouraData.readiness.length - 1];
         const score = latest.score;
         document.getElementById('readiness-score').textContent = score;
-        document.getElementById('readiness-score').className = 'value ' + getScoreClass(score);
-
-        const bar = document.getElementById('readiness-bar');
-        bar.style.width = score + '%';
-        bar.className = 'fill ' + getBarClass(score);
+        updateScoreRing('readiness-ring', score);
 
         if (ouraData.readiness.length > 1) {
           const prev = ouraData.readiness[ouraData.readiness.length - 2].score;
@@ -1420,16 +1937,11 @@
         }
       }
 
-      // Sleep Score
       if (ouraData.sleep.length) {
         const latest = ouraData.sleep[ouraData.sleep.length - 1];
         const score = latest.score;
         document.getElementById('sleep-score').textContent = score;
-        document.getElementById('sleep-score').className = 'value ' + getScoreClass(score);
-
-        const bar = document.getElementById('sleep-bar');
-        bar.style.width = score + '%';
-        bar.className = 'fill ' + getBarClass(score);
+        updateScoreRing('sleep-ring', score);
 
         if (ouraData.sleep.length > 1) {
           const prev = ouraData.sleep[ouraData.sleep.length - 2].score;
@@ -1440,29 +1952,23 @@
         }
       }
 
-      // HRV from readiness contributors
-      if (ouraData.readiness.length) {
-        const latest = ouraData.readiness[ouraData.readiness.length - 1];
-        if (latest.contributors?.hrv_balance !== undefined) {
-          document.getElementById('hrv-value').innerHTML = latest.contributors.hrv_balance + '<span class="unit"> score</span>';
-        }
-      }
-
-      // Resting HR from sleep details
       if (ouraData.sleepDetails && ouraData.sleepDetails.length) {
         const latest = ouraData.sleepDetails[ouraData.sleepDetails.length - 1];
         if (latest.lowest_heart_rate) {
-          document.getElementById('resting-hr').innerHTML = latest.lowest_heart_rate + '<span class="unit"> bpm</span>';
+          document.getElementById('resting-hr').textContent = latest.lowest_heart_rate;
+          const hrScore = Math.max(0, 100 - ((latest.lowest_heart_rate - 40) * 2.5));
+          updateScoreRing('hr-ring', hrScore);
         }
         if (latest.average_hrv) {
-          document.getElementById('hrv-value').innerHTML = latest.average_hrv + '<span class="unit"> ms</span>';
+          document.getElementById('hrv-value').textContent = latest.average_hrv;
+          updateScoreRing('hrv-ring', Math.min(latest.average_hrv, 100));
 
           if (ouraData.sleepDetails.length > 1) {
             const prev = ouraData.sleepDetails[ouraData.sleepDetails.length - 2];
             if (prev.average_hrv) {
               const diff = latest.average_hrv - prev.average_hrv;
               const trendEl = document.getElementById('hrv-trend');
-              trendEl.textContent = diff > 0 ? `+${diff}ms from yesterday` : diff < 0 ? `${diff}ms from yesterday` : 'Same as yesterday';
+              trendEl.textContent = diff > 0 ? `+${diff}ms` : diff < 0 ? `${diff}ms` : 'Same';
               trendEl.className = 'trend ' + (diff > 0 ? 'up' : diff < 0 ? 'down' : 'neutral');
             }
           }
@@ -1470,7 +1976,6 @@
       }
     }
 
-    // Update Strava Summary Cards
     function updateStravaSummary() {
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
@@ -1479,68 +1984,24 @@
       );
 
       const totalDistanceKm = weeklyActivities.reduce((sum, a) => sum + a.distance, 0) / 1000;
-      const totalDistance = totalDistanceKm * 0.621371; // Convert to miles
-      document.getElementById('weekly-distance').innerHTML = totalDistance.toFixed(1) + '<span class="unit"> mi</span>';
+      const totalDistance = totalDistanceKm * 0.621371;
+      document.getElementById('weekly-distance').innerHTML = totalDistance.toFixed(1) + '<span class="stat-unit"> mi</span>';
       document.getElementById('weekly-activities').textContent = weeklyActivities.length;
-
-      // Calculate vs previous week
-      const twoWeeksAgo = new Date();
-      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
-      const prevWeekActivities = stravaData.activities.filter(a => {
-        const date = new Date(a.start_date_local);
-        return date >= twoWeeksAgo && date < weekAgo;
-      });
-
-      const prevDistanceKm = prevWeekActivities.reduce((sum, a) => sum + a.distance, 0) / 1000;
-      const prevDistance = prevDistanceKm * 0.621371; // Convert to miles
-      const distanceDiff = totalDistance - prevDistance;
-      const distanceTrend = document.getElementById('distance-trend');
-
-      if (prevDistance > 0) {
-        const pct = ((distanceDiff / prevDistance) * 100).toFixed(0);
-        distanceTrend.textContent = distanceDiff > 0 ? `+${pct}% vs last week` : `${pct}% vs last week`;
-        distanceTrend.className = 'trend ' + (distanceDiff > 0 ? 'up' : distanceDiff < 0 ? 'down' : 'neutral');
-      } else {
-        distanceTrend.textContent = 'First week tracked';
-        distanceTrend.className = 'trend neutral';
-      }
-
-      const activityDiff = weeklyActivities.length - prevWeekActivities.length;
-      const activitiesTrend = document.getElementById('activities-trend');
-      activitiesTrend.textContent = activityDiff > 0 ? `+${activityDiff} vs last week` : activityDiff < 0 ? `${activityDiff} vs last week` : 'Same as last week';
-      activitiesTrend.className = 'trend ' + (activityDiff > 0 ? 'up' : activityDiff < 0 ? 'down' : 'neutral');
     }
 
-    // Update Oura Detailed Metrics
     function updateOuraDetails() {
-      // Sleep Details
       if (ouraData.sleepDetails && ouraData.sleepDetails.length) {
         const latest = ouraData.sleepDetails[ouraData.sleepDetails.length - 1];
 
-        if (latest.total_sleep_duration) {
-          document.getElementById('total-sleep').textContent = formatDuration(latest.total_sleep_duration);
-        }
-        if (latest.time_in_bed) {
-          document.getElementById('time-in-bed').textContent = formatDuration(latest.time_in_bed);
-        }
-        if (latest.efficiency) {
-          document.getElementById('sleep-efficiency').textContent = latest.efficiency + '%';
-        }
-        if (latest.deep_sleep_duration) {
-          document.getElementById('deep-sleep').textContent = formatDurationShort(latest.deep_sleep_duration);
-        }
-        if (latest.rem_sleep_duration) {
-          document.getElementById('rem-sleep').textContent = formatDurationShort(latest.rem_sleep_duration);
-        }
-        if (latest.light_sleep_duration) {
-          document.getElementById('light-sleep').textContent = formatDurationShort(latest.light_sleep_duration);
-        }
-        if (latest.awake_time) {
-          document.getElementById('awake-time').textContent = formatDurationShort(latest.awake_time);
-        }
+        if (latest.total_sleep_duration) document.getElementById('total-sleep').textContent = formatDuration(latest.total_sleep_duration);
+        if (latest.time_in_bed) document.getElementById('time-in-bed').textContent = formatDuration(latest.time_in_bed);
+        if (latest.efficiency) document.getElementById('sleep-efficiency').textContent = latest.efficiency + '%';
+        if (latest.deep_sleep_duration) document.getElementById('deep-sleep').textContent = formatDurationShort(latest.deep_sleep_duration);
+        if (latest.rem_sleep_duration) document.getElementById('rem-sleep').textContent = formatDurationShort(latest.rem_sleep_duration);
+        if (latest.light_sleep_duration) document.getElementById('light-sleep').textContent = formatDurationShort(latest.light_sleep_duration);
+        if (latest.awake_time) document.getElementById('awake-time').textContent = formatDurationShort(latest.awake_time);
       }
 
-      // Readiness Contributors
       if (ouraData.readiness.length) {
         const latest = ouraData.readiness[ouraData.readiness.length - 1];
         const c = latest.contributors || {};
@@ -1553,7 +2014,6 @@
         if (c.recovery_index !== undefined) document.getElementById('contrib-recovery').textContent = c.recovery_index;
       }
 
-      // Activity Details
       if (ouraData.activity.length) {
         const latest = ouraData.activity[ouraData.activity.length - 1];
 
@@ -1566,7 +2026,6 @@
       }
     }
 
-    // Update Strava Detailed Metrics
     function updateStravaDetails() {
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
@@ -1575,30 +2034,27 @@
       );
 
       const totalDistanceKm = weeklyActivities.reduce((sum, a) => sum + a.distance, 0) / 1000;
-      const totalDistance = totalDistanceKm * 0.621371; // Convert to miles
+      const totalDistance = totalDistanceKm * 0.621371;
       const totalTime = weeklyActivities.reduce((sum, a) => sum + a.moving_time, 0);
       const totalElevationM = weeklyActivities.reduce((sum, a) => sum + (a.total_elevation_gain || 0), 0);
-      const totalElevation = totalElevationM * 3.28084; // Convert to feet
+      const totalElevation = totalElevationM * 3.28084;
 
       document.getElementById('strava-week-distance').textContent = totalDistance.toFixed(1) + ' mi';
       document.getElementById('strava-week-time').textContent = formatDuration(totalTime);
       document.getElementById('strava-week-elevation').textContent = Math.round(totalElevation).toLocaleString() + ' ft';
 
-      // Average HR
       const activitiesWithHR = weeklyActivities.filter(a => a.average_heartrate);
       if (activitiesWithHR.length) {
         const avgHR = activitiesWithHR.reduce((sum, a) => sum + a.average_heartrate, 0) / activitiesWithHR.length;
         document.getElementById('strava-avg-hr').textContent = Math.round(avgHR) + ' bpm';
       }
 
-      // Longest activity
       if (weeklyActivities.length) {
         const longest = weeklyActivities.reduce((max, a) => a.distance > max.distance ? a : max);
         const longestMiles = (longest.distance / 1000) * 0.621371;
         document.getElementById('strava-longest').textContent = longestMiles.toFixed(1) + ' mi';
       }
 
-      // Activity types
       const types = [...new Set(weeklyActivities.map(a => a.type))];
       document.getElementById('strava-types').textContent = types.join(', ') || '--';
     }
@@ -1606,41 +2062,22 @@
     function formatDuration(seconds) {
       const hours = Math.floor(seconds / 3600);
       const mins = Math.floor((seconds % 3600) / 60);
-      if (hours > 0) {
-        return `${hours}h ${mins}m`;
-      }
+      if (hours > 0) return `${hours}h ${mins}m`;
       return `${mins}m`;
     }
 
     function formatDurationShort(seconds) {
       const hours = Math.floor(seconds / 3600);
       const mins = Math.floor((seconds % 3600) / 60);
-      if (hours > 0) {
-        return `${hours}h${mins > 0 ? mins + 'm' : ''}`;
-      }
+      if (hours > 0) return `${hours}h${mins > 0 ? mins + 'm' : ''}`;
       return `${mins}m`;
     }
 
-    function getScoreClass(score) {
-      if (score >= 85) return 'score-excellent';
-      if (score >= 70) return 'score-good';
-      if (score >= 50) return 'score-fair';
-      return 'score-poor';
-    }
-
-    function getBarClass(score) {
-      if (score >= 85) return 'excellent';
-      if (score >= 70) return 'good';
-      if (score >= 50) return 'fair';
-      return 'poor';
-    }
-
-    // Render Activities List (now uses the enhanced version with click handlers)
     function renderActivities() {
       renderActivitiesWithHighlight(formatDateForInput(selectedDate));
     }
 
-    // Render Sleep Chart
+    // Charts with dark theme and animations
     function renderSleepChart() {
       const ctx = document.getElementById('sleep-chart').getContext('2d');
       const data = ouraData.sleep.slice(-14);
@@ -1659,39 +2096,36 @@
             data: data.map(d => d.score),
             backgroundColor: data.map(d => {
               if (d.score >= 85) return 'rgba(16, 185, 129, 0.8)';
-              if (d.score >= 70) return 'rgba(52, 211, 153, 0.8)';
-              if (d.score >= 50) return 'rgba(251, 191, 36, 0.8)';
-              return 'rgba(248, 113, 113, 0.8)';
+              if (d.score >= 70) return 'rgba(52, 211, 153, 0.7)';
+              if (d.score >= 50) return 'rgba(245, 158, 11, 0.7)';
+              return 'rgba(239, 68, 68, 0.7)';
             }),
-            borderRadius: 6
+            borderRadius: 6,
+            borderSkipped: false
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: { duration: 1000, easing: 'easeOutQuart' },
           plugins: { legend: { display: false } },
           scales: {
-            y: {
-              beginAtZero: true,
-              max: 100,
-              grid: { color: 'rgba(0,0,0,0.05)' },
-              ticks: { color: '#666' }
-            },
-            x: {
-              grid: { display: false },
-              ticks: { color: '#666' }
-            }
+            y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.05)' } },
+            x: { grid: { display: false } }
           }
         }
       });
     }
 
-    // Render Readiness Chart
     function renderReadinessChart() {
       const ctx = document.getElementById('readiness-chart').getContext('2d');
       const data = ouraData.readiness.slice(-14);
 
       if (window.readinessChart) window.readinessChart.destroy();
+
+      const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+      gradient.addColorStop(0, 'rgba(0, 212, 170, 0.3)');
+      gradient.addColorStop(1, 'rgba(0, 212, 170, 0)');
 
       window.readinessChart = new Chart(ctx, {
         type: 'line',
@@ -1703,51 +2137,41 @@
           datasets: [{
             label: 'Readiness',
             data: data.map(d => d.score),
-            borderColor: '#667eea',
-            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            borderColor: '#00d4aa',
+            backgroundColor: gradient,
             fill: true,
             tension: 0.4,
             pointRadius: 4,
-            pointBackgroundColor: '#667eea'
+            pointBackgroundColor: '#00d4aa',
+            pointBorderColor: '#0d0d0f',
+            pointBorderWidth: 2
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: { duration: 1000, easing: 'easeOutQuart' },
           plugins: { legend: { display: false } },
           scales: {
-            y: {
-              beginAtZero: true,
-              max: 100,
-              grid: { color: 'rgba(0,0,0,0.05)' },
-              ticks: { color: '#666' }
-            },
-            x: {
-              grid: { display: false },
-              ticks: { color: '#666' }
-            }
+            y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.05)' } },
+            x: { grid: { display: false } }
           }
         }
       });
     }
 
-    // Render HRV Chart
     function renderHRVChart() {
       const ctx = document.getElementById('hrv-chart').getContext('2d');
       let data = ouraData.sleepDetails ? ouraData.sleepDetails.slice(-14) : [];
 
       if (window.hrvChart) window.hrvChart.destroy();
 
-      // Filter to only entries with HRV data
       data = data.filter(d => d.average_hrv !== undefined && d.average_hrv !== null);
+      if (!data.length) return;
 
-      if (!data.length) {
-        // No HRV data available
-        console.log('No HRV data available in sleepDetails');
-        return;
-      }
-
-      console.log('HRV data for chart:', data.map(d => ({ day: d.day, hrv: d.average_hrv })));
+      const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+      gradient.addColorStop(0, 'rgba(236, 72, 153, 0.3)');
+      gradient.addColorStop(1, 'rgba(236, 72, 153, 0)');
 
       window.hrvChart = new Chart(ctx, {
         type: 'line',
@@ -1760,38 +2184,33 @@
             label: 'HRV (ms)',
             data: data.map(d => d.average_hrv),
             borderColor: '#ec4899',
-            backgroundColor: 'rgba(236, 72, 153, 0.1)',
+            backgroundColor: gradient,
             fill: true,
             tension: 0.4,
             pointRadius: 4,
-            pointBackgroundColor: '#ec4899'
+            pointBackgroundColor: '#ec4899',
+            pointBorderColor: '#0d0d0f',
+            pointBorderWidth: 2
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: { duration: 1000, easing: 'easeOutQuart' },
           plugins: { legend: { display: false } },
           scales: {
-            y: {
-              grid: { color: 'rgba(0,0,0,0.05)' },
-              ticks: { color: '#666' }
-            },
-            x: {
-              grid: { display: false },
-              ticks: { color: '#666' }
-            }
+            y: { grid: { color: 'rgba(255,255,255,0.05)' } },
+            x: { grid: { display: false } }
           }
         }
       });
     }
 
-    // Render Activity Chart
     function renderActivityChart() {
       const ctx = document.getElementById('activity-chart').getContext('2d');
 
       if (!stravaData.activities || !stravaData.activities.length) return;
 
-      // Group activities by week
       const weeks = {};
       stravaData.activities.forEach(a => {
         const date = new Date(a.start_date_local);
@@ -1802,7 +2221,6 @@
         if (!weeks[key]) {
           weeks[key] = { distance: 0, duration: 0, count: 0 };
         }
-        // Convert km to miles
         weeks[key].distance += (a.distance / 1000) * 0.621371;
         weeks[key].duration += a.moving_time / 3600;
         weeks[key].count++;
@@ -1836,18 +2254,19 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: { duration: 1000, easing: 'easeOutQuart' },
           plugins: {
-            legend: { labels: { color: '#666' } }
+            legend: {
+              labels: {
+                color: '#a0a0a8',
+                usePointStyle: true,
+                padding: 20
+              }
+            }
           },
           scales: {
-            y: {
-              grid: { color: 'rgba(0,0,0,0.05)' },
-              ticks: { color: '#666' }
-            },
-            x: {
-              grid: { display: false },
-              ticks: { color: '#666' }
-            }
+            y: { grid: { color: 'rgba(255,255,255,0.05)' } },
+            x: { grid: { display: false } }
           }
         }
       });
@@ -1857,7 +2276,6 @@
     function generateInsights() {
       const insights = [];
 
-      // Sleep insights
       if (ouraData.sleep.length >= 7) {
         const recentSleep = ouraData.sleep.slice(-7);
         const avgScore = recentSleep.reduce((sum, d) => sum + d.score, 0) / recentSleep.length;
@@ -1874,38 +2292,31 @@
           insights.push({
             type: 'negative',
             title: 'Sleep Needs Attention',
-            text: `You had ${lowSleepDays} days with sleep scores below 70 this week. Poor sleep affects recovery and performance.`,
-            recommendation: 'Try going to bed 30 minutes earlier and limit screen time before sleep.'
+            text: `You had ${lowSleepDays} days with sleep scores below 70 this week.`,
+            recommendation: 'Try going to bed 30 minutes earlier.'
           });
         }
       }
 
-      // HRV insights
-      if (ouraData.sleepDetails && ouraData.sleepDetails.length >= 7) {
-        const recent = ouraData.sleepDetails.slice(-7).filter(d => d.average_hrv);
-        if (recent.length >= 5) {
-          const avgHRV = recent.reduce((sum, d) => sum + d.average_hrv, 0) / recent.length;
-          const latest = recent[recent.length - 1].average_hrv;
-
-          if (latest > avgHRV * 1.1) {
-            insights.push({
-              type: 'positive',
-              title: 'HRV Above Average',
-              text: `Your HRV is ${Math.round((latest/avgHRV - 1) * 100)}% above your weekly average. Your nervous system is well-recovered.`,
-              recommendation: 'Great day for a challenging workout!'
-            });
-          } else if (latest < avgHRV * 0.85) {
-            insights.push({
-              type: 'negative',
-              title: 'HRV Below Baseline',
-              text: `Your HRV is ${Math.round((1 - latest/avgHRV) * 100)}% below your weekly average, indicating stress or incomplete recovery.`,
-              recommendation: 'Consider lighter activity and prioritize recovery today.'
-            });
-          }
+      if (ouraData.readiness.length) {
+        const latest = ouraData.readiness[ouraData.readiness.length - 1];
+        if (latest.score >= 85) {
+          insights.push({
+            type: 'positive',
+            title: 'Peak Performance Day',
+            text: `Readiness score of ${latest.score} indicates excellent recovery.`,
+            recommendation: 'Ideal day for a hard workout!'
+          });
+        } else if (latest.score < 60) {
+          insights.push({
+            type: 'negative',
+            title: 'Recovery Day Advised',
+            text: `Readiness score of ${latest.score} suggests your body needs rest.`,
+            recommendation: 'Opt for light activity today.'
+          });
         }
       }
 
-      // Training consistency
       if (stravaData.activities && stravaData.activities.length >= 7) {
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
@@ -1915,45 +2326,17 @@
           insights.push({
             type: 'positive',
             title: 'Strong Training Consistency',
-            text: `You completed ${thisWeek.length} workouts this week. Consistency is the foundation of fitness improvement!`,
-            recommendation: 'Balance this with adequate recovery based on your readiness scores.'
-          });
-        } else if (thisWeek.length <= 1) {
-          insights.push({
-            type: 'negative',
-            title: 'Training Volume Low',
-            text: `Only ${thisWeek.length} workout${thisWeek.length === 1 ? '' : 's'} recorded this week.`,
-            recommendation: 'Aim for 3-4 sessions per week for optimal fitness maintenance.'
+            text: `You completed ${thisWeek.length} workouts this week.`,
+            recommendation: 'Balance this with adequate recovery.'
           });
         }
       }
 
-      // Readiness-based recommendation
-      if (ouraData.readiness.length) {
-        const latest = ouraData.readiness[ouraData.readiness.length - 1];
-        if (latest.score >= 85) {
-          insights.push({
-            type: 'positive',
-            title: 'Peak Performance Day',
-            text: `Readiness score of ${latest.score} indicates excellent recovery. Your body is primed for performance.`,
-            recommendation: 'Ideal day for a hard workout or race!'
-          });
-        } else if (latest.score < 60) {
-          insights.push({
-            type: 'negative',
-            title: 'Recovery Day Advised',
-            text: `Readiness score of ${latest.score} suggests your body needs rest. Pushing hard today may lead to overtraining.`,
-            recommendation: 'Opt for light activity like walking, yoga, or stretching.'
-          });
-        }
-      }
-
-      // Default if no insights
       if (insights.length === 0) {
         insights.push({
           type: 'neutral',
           title: 'Connect Your Data',
-          text: 'Connect both Oura and Strava to see personalized insights about your sleep, recovery, and training patterns.',
+          text: 'Connect both Oura and Strava to see personalized insights.',
           recommendation: 'The more data available, the better the recommendations!'
         });
       }
@@ -1967,7 +2350,7 @@
         <div class="insight-card ${insight.type}">
           <h3>${insight.title}</h3>
           <p>${insight.text}</p>
-          <div class="recommendation">💡 ${insight.recommendation}</div>
+          <div class="recommendation">${insight.recommendation}</div>
         </div>
       `).join('');
     }
