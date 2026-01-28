@@ -131,24 +131,30 @@ app.get('/callback/oura', async (req, res) => {
   const { code, error: ouraError } = req.query;
   const baseUrl = getBaseUrl(req);
 
+  console.log('Oura callback received. Code:', code ? 'present' : 'missing', 'Error:', ouraError || 'none');
+  console.log('Base URL detected:', baseUrl);
+
   if (ouraError) {
     console.error('Oura authorization denied:', ouraError);
-    return res.redirect('/?oura=error');
+    return res.redirect('/?oura=error&reason=' + encodeURIComponent(ouraError));
   }
 
   if (!code) {
     console.error('No authorization code received from Oura');
-    return res.redirect('/?oura=error');
+    return res.redirect('/?oura=error&reason=no_code');
   }
 
   try {
+    const redirectUri = `${baseUrl}/callback/oura`;
+    console.log('Token exchange with redirect_uri:', redirectUri);
+
     // Oura requires form-urlencoded data
     const params = new URLSearchParams();
     params.append('grant_type', 'authorization_code');
     params.append('code', code);
     params.append('client_id', process.env.OURA_CLIENT_ID);
     params.append('client_secret', process.env.OURA_CLIENT_SECRET);
-    params.append('redirect_uri', `${baseUrl}/callback/oura`);
+    params.append('redirect_uri', redirectUri);
 
     const response = await axios.post('https://api.ouraring.com/oauth/token', params, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
@@ -159,8 +165,9 @@ app.get('/callback/oura', async (req, res) => {
     console.log('Oura connected successfully!');
     res.redirect('/?oura=connected');
   } catch (error) {
-    console.error('Oura OAuth error:', error.response?.data || error.message);
-    res.redirect('/?oura=error');
+    const errorMsg = error.response?.data?.detail || error.response?.data?.error || error.message;
+    console.error('Oura OAuth error:', JSON.stringify(error.response?.data || error.message));
+    res.redirect('/?oura=error&reason=' + encodeURIComponent(errorMsg));
   }
 });
 
