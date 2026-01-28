@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Dashboard - Oura + Strava</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #f5f7fa;
+      min-height: 100vh;
+      color: #1a1a2e;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      padding: 30px 0;
+      border-bottom: 1px solid #e0e4e8;
+      margin-bottom: 30px;
+      background: white;
+      margin: -20px -20px 30px -20px;
+      padding: 30px 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    .connection-status {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 30px;
+      background: white;
+      border: 2px solid #e0e4e8;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .status-badge.connected {
+      border-color: #10b981;
+      background: #ecfdf5;
+    }
+
+    .status-badge.disconnected {
+      border-color: #f87171;
+      background: #fef2f2;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .status-dot.green { background: #10b981; }
+    .status-dot.red { background: #f87171; }
+
+    .connect-btn {
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 15px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-left: 10px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .connect-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Summary Cards */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    .summary-card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      text-align: center;
+      border: 1px solid #e0e4e8;
+    }
+
+    .summary-card .label {
+      color: #666;
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .summary-card .value {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    .summary-card .unit {
+      font-size: 0.9rem;
+      color: #666;
+      font-weight: 400;
+    }
+
+    .summary-card .trend {
+      font-size: 0.8rem;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    .trend.up { color: #10b981; }
+    .trend.down { color: #f87171; }
+    .trend.neutral { color: #666; }
+
+    /* Score colors */
+    .score-excellent { color: #10b981; }
+    .score-good { color: #34d399; }
+    .score-fair { color: #fbbf24; }
+    .score-poor { color: #f87171; }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 1000px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border: 1px solid #e0e4e8;
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #1a1a2e;
+    }
+
+    .card h2 .icon {
+      font-size: 1.3rem;
+    }
+
+    /* Charts */
+    .chart-container {
+      position: relative;
+      height: 250px;
+    }
+
+    /* Activity List */
+    .activity-list {
+      max-height: 350px;
+      overflow-y: auto;
+    }
+
+    .activity-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: #f8fafc;
+      margin-bottom: 10px;
+      border: 1px solid #e0e4e8;
+      transition: transform 0.2s;
+    }
+
+    .activity-item:hover {
+      transform: translateX(4px);
+      background: #f1f5f9;
+    }
+
+    .activity-info h3 {
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+      color: #1a1a2e;
+    }
+
+    .activity-info p {
+      color: #666;
+      font-size: 0.8rem;
+    }
+
+    .activity-stats {
+      text-align: right;
+    }
+
+    .activity-stats .distance {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #667eea;
+    }
+
+    .activity-stats .time {
+      color: #666;
+      font-size: 0.8rem;
+    }
+
+    /* Detailed Metrics Section */
+    .metrics-section {
+      margin-bottom: 30px;
+    }
+
+    .metrics-section h2 {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+      color: #1a1a2e;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .metric-card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border: 1px solid #e0e4e8;
+    }
+
+    .metric-card h3 {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .metric-row:last-child {
+      border-bottom: none;
+    }
+
+    .metric-row .label {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .metric-row .value {
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+
+    /* Sleep Stages */
+    .sleep-stages {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .sleep-stage {
+      flex: 1;
+      text-align: center;
+      padding: 10px 8px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+    }
+
+    .sleep-stage.deep { background: #c7d2fe; color: #4338ca; }
+    .sleep-stage.rem { background: #ddd6fe; color: #7c3aed; }
+    .sleep-stage.light { background: #e0e7ff; color: #4f46e5; }
+    .sleep-stage.awake { background: #fef3c7; color: #d97706; }
+
+    .sleep-stage .stage-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: block;
+    }
+
+    /* Insights Section */
+    .insights-section {
+      margin-top: 30px;
+    }
+
+    .insights-section h2 {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #1a1a2e;
+    }
+
+    .insights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .insight-card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border: 1px solid #e0e4e8;
+      border-left: 4px solid #667eea;
+    }
+
+    .insight-card.positive {
+      border-left-color: #10b981;
+      background: linear-gradient(135deg, #ecfdf5 0%, white 100%);
+    }
+
+    .insight-card.negative {
+      border-left-color: #f87171;
+      background: linear-gradient(135deg, #fef2f2 0%, white 100%);
+    }
+
+    .insight-card.neutral {
+      border-left-color: #667eea;
+      background: linear-gradient(135deg, #eef2ff 0%, white 100%);
+    }
+
+    .insight-card h3 {
+      font-size: 1rem;
+      margin-bottom: 10px;
+      color: #1a1a2e;
+    }
+
+    .insight-card p {
+      color: #666;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .insight-card .recommendation {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #e0e4e8;
+      font-weight: 500;
+      color: #1a1a2e;
+      font-size: 0.9rem;
+    }
+
+    /* Loading State */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #e0e4e8;
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+
+    .empty-state .icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+    }
+
+    /* Full Width Card */
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      height: 8px;
+      background: #e0e4e8;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-bar .fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+
+    .progress-bar .fill.excellent { background: linear-gradient(90deg, #10b981, #34d399); }
+    .progress-bar .fill.good { background: linear-gradient(90deg, #34d399, #6ee7b7); }
+    .progress-bar .fill.fair { background: linear-gradient(90deg, #fbbf24, #fcd34d); }
+    .progress-bar .fill.poor { background: linear-gradient(90deg, #f87171, #fca5a5); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Health Dashboard</h1>
+      <p>Your unified view of Oura Ring + Strava data</p>
+    </header>
+
+    <div class="connection-status">
+      <div class="status-badge disconnected" id="strava-status">
+        <span class="status-dot red"></span>
+        <span>Strava</span>
+        <button class="connect-btn" id="connect-strava">Connect</button>
+      </div>
+      <div class="status-badge disconnected" id="oura-status">
+        <span class="status-dot red"></span>
+        <span>Oura</span>
+        <button class="connect-btn" id="connect-oura">Connect</button>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-grid" id="summary-cards">
+      <div class="summary-card">
+        <div class="label">Readiness</div>
+        <div class="value" id="readiness-score">--</div>
+        <div class="progress-bar"><div class="fill" id="readiness-bar" style="width: 0%"></div></div>
+        <div class="trend neutral" id="readiness-trend">Connect Oura</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">Sleep Score</div>
+        <div class="value" id="sleep-score">--</div>
+        <div class="progress-bar"><div class="fill" id="sleep-bar" style="width: 0%"></div></div>
+        <div class="trend neutral" id="sleep-trend">Connect Oura</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">HRV</div>
+        <div class="value" id="hrv-value">--<span class="unit">ms</span></div>
+        <div class="trend neutral" id="hrv-trend">Connect Oura</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">Resting HR</div>
+        <div class="value" id="resting-hr">--<span class="unit">bpm</span></div>
+        <div class="trend neutral" id="hr-trend">Connect Oura</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">Weekly Distance</div>
+        <div class="value" id="weekly-distance">--<span class="unit">km</span></div>
+        <div class="trend neutral" id="distance-trend">Connect Strava</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">Weekly Activities</div>
+        <div class="value" id="weekly-activities">--</div>
+        <div class="trend neutral" id="activities-trend">Connect Strava</div>
+      </div>
+    </div>
+
+    <!-- Detailed Metrics -->
+    <div class="metrics-section" id="detailed-metrics">
+      <h2><span class="icon">📊</span> Detailed Metrics</h2>
+      <div class="metrics-grid">
+        <!-- Sleep Details -->
+        <div class="metric-card" id="sleep-details">
+          <h3>Last Night's Sleep</h3>
+          <div class="metric-row">
+            <span class="label">Total Sleep</span>
+            <span class="value" id="total-sleep">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">Time in Bed</span>
+            <span class="value" id="time-in-bed">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">Efficiency</span>
+            <span class="value" id="sleep-efficiency">--</span>
+          </div>
+          <div class="sleep-stages" id="sleep-stages">
+            <div class="sleep-stage deep">
+              <span class="stage-value" id="deep-sleep">--</span>
+              Deep
+            </div>
+            <div class="sleep-stage rem">
+              <span class="stage-value" id="rem-sleep">--</span>
+              REM
+            </div>
+            <div class="sleep-stage light">
+              <span class="stage-value" id="light-sleep">--</span>
+              Light
+            </div>
+            <div class="sleep-stage awake">
+              <span class="stage-value" id="awake-time">--</span>
+              Awake
+            </div>
+          </div>
+        </div>
+
+        <!-- Readiness Contributors -->
+        <div class="metric-card" id="readiness-details">
+          <h3>Readiness Contributors</h3>
+          <div class="metric-row">
+            <span class="label">Previous Night</span>
+            <span class="value" id="contrib-sleep">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">Sleep Balance</span>
+            <span class="value" id="contrib-sleep-balance">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">Previous Day Activity</span>
+            <span class="value" id="contrib-activity">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">Activity Balance</span>
+            <span class="value" id="contrib-activity-balance">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">Body Temperature</span>
+            <span class="value" id="contrib-temp">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">Recovery Index</span>
+            <span class="value" id="contrib-recovery">--</span>
+          </div>
+        </div>
+
+        <!-- Activity Summary -->
+        <div class="metric-card" id="activity-details">
+          <h3>Activity Summary (Oura)</h3>
+          <div class="metric-row">
+            <span class="label">Steps</span>
+            <span class="value" id="daily-steps">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">Active Calories</span>
+            <span class="value" id="active-calories">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">Total Calories</span>
+            <span class="value" id="total-calories">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">Low Activity</span>
+            <span class="value" id="low-activity">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">Medium Activity</span>
+            <span class="value" id="medium-activity">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">High Activity</span>
+            <span class="value" id="high-activity">--</span>
+          </div>
+        </div>
+
+        <!-- Strava Stats -->
+        <div class="metric-card" id="strava-details">
+          <h3>Training Stats (Strava)</h3>
+          <div class="metric-row">
+            <span class="label">This Week Distance</span>
+            <span class="value" id="strava-week-distance">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">This Week Time</span>
+            <span class="value" id="strava-week-time">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">This Week Elevation</span>
+            <span class="value" id="strava-week-elevation">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">Avg Heart Rate</span>
+            <span class="value" id="strava-avg-hr">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">Longest Activity</span>
+            <span class="value" id="strava-longest">--</span>
+          </div>
+          <div class="metric-row">
+            <span class="label">Activity Types</span>
+            <span class="value" id="strava-types">--</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Dashboard Charts -->
+    <div class="dashboard-grid">
+      <!-- Sleep Chart -->
+      <div class="card">
+        <h2><span class="icon">😴</span> Sleep Score (Last 14 Days)</h2>
+        <div class="chart-container">
+          <canvas id="sleep-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Readiness Chart -->
+      <div class="card">
+        <h2><span class="icon">⚡</span> Readiness Score (Last 14 Days)</h2>
+        <div class="chart-container">
+          <canvas id="readiness-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- HRV Chart -->
+      <div class="card">
+        <h2><span class="icon">💓</span> HRV Trend (Last 14 Days)</h2>
+        <div class="chart-container">
+          <canvas id="hrv-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Activity Chart -->
+      <div class="card">
+        <h2><span class="icon">🏃</span> Training Load (Weekly)</h2>
+        <div class="chart-container">
+          <canvas id="activity-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Recent Activities -->
+      <div class="card full-width">
+        <h2><span class="icon">📋</span> Recent Activities</h2>
+        <div class="activity-list" id="activity-list">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading activities...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insights Section -->
+    <div class="insights-section">
+      <h2><span class="icon">💡</span> Insights & Recommendations</h2>
+      <div class="insights-grid" id="insights-grid">
+        <div class="insight-card neutral">
+          <h3>Loading insights...</h3>
+          <p>Connect your data sources to see personalized recommendations.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global data storage
+    let stravaData = { activities: [], athlete: null };
+    let ouraData = { sleep: [], readiness: [], activity: [], heartrate: [], sleepDetails: [] };
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      checkStravaConnection();
+      checkOuraConnection();
+
+      document.getElementById('connect-strava').addEventListener('click', connectStrava);
+      document.getElementById('connect-oura').addEventListener('click', connectOura);
+
+      // Check URL params for connection status
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('strava') === 'connected') {
+        updateStravaStatus(true);
+        loadStravaData();
+        history.replaceState({}, '', '/');
+      }
+      if (params.get('oura') === 'connected') {
+        updateOuraStatus(true);
+        loadOuraData();
+        history.replaceState({}, '', '/');
+      }
+    });
+
+    // Connect Strava
+    async function connectStrava() {
+      const response = await fetch('/api/strava/auth-url');
+      const data = await response.json();
+      window.location.href = data.url;
+    }
+
+    // Connect Oura
+    async function connectOura() {
+      const response = await fetch('/api/oura/auth-url');
+      const data = await response.json();
+      window.location.href = data.url;
+    }
+
+    // Check Strava connection
+    async function checkStravaConnection() {
+      try {
+        const response = await fetch('/api/strava/status');
+        const data = await response.json();
+
+        if (data.connected) {
+          updateStravaStatus(true);
+          loadStravaData();
+        }
+      } catch (error) {
+        console.error('Error checking Strava status:', error);
+      }
+    }
+
+    // Check Oura connection
+    async function checkOuraConnection() {
+      try {
+        const response = await fetch('/api/oura/status');
+        const data = await response.json();
+
+        if (data.connected) {
+          updateOuraStatus(true);
+          loadOuraData();
+        }
+      } catch (error) {
+        console.error('Error checking Oura status:', error);
+      }
+    }
+
+    function updateStravaStatus(connected) {
+      const badge = document.getElementById('strava-status');
+      if (connected) {
+        badge.classList.remove('disconnected');
+        badge.classList.add('connected');
+        badge.innerHTML = '<span class="status-dot green"></span><span>Strava Connected</span>';
+      }
+    }
+
+    function updateOuraStatus(connected) {
+      const badge = document.getElementById('oura-status');
+      if (connected) {
+        badge.classList.remove('disconnected');
+        badge.classList.add('connected');
+        badge.innerHTML = '<span class="status-dot green"></span><span>Oura Connected</span>';
+      }
+    }
+
+    // Load Strava Data
+    async function loadStravaData() {
+      try {
+        const [activitiesRes, athleteRes] = await Promise.all([
+          fetch('/api/strava/activities'),
+          fetch('/api/strava/athlete')
+        ]);
+
+        if (activitiesRes.status === 401) {
+          const data = await activitiesRes.json();
+          if (data.needsAuth) {
+            console.log('Strava needs re-authorization');
+            return;
+          }
+        }
+
+        if (activitiesRes.ok) {
+          stravaData.activities = await activitiesRes.json();
+        }
+        if (athleteRes.ok) {
+          stravaData.athlete = await athleteRes.json();
+        }
+
+        updateStravaStatus(true);
+        renderActivities();
+        renderActivityChart();
+        updateStravaSummary();
+        updateStravaDetails();
+        generateInsights();
+      } catch (error) {
+        console.error('Error loading Strava data:', error);
+      }
+    }
+
+    // Load Oura Data
+    async function loadOuraData() {
+      try {
+        const [sleepRes, readinessRes, activityRes, sleepDetailsRes] = await Promise.all([
+          fetch('/api/oura/sleep'),
+          fetch('/api/oura/readiness'),
+          fetch('/api/oura/activity'),
+          fetch('/api/oura/sleep-details')
+        ]);
+
+        if (sleepRes.ok) ouraData.sleep = (await sleepRes.json()).data || [];
+        if (readinessRes.ok) ouraData.readiness = (await readinessRes.json()).data || [];
+        if (activityRes.ok) ouraData.activity = (await activityRes.json()).data || [];
+        if (sleepDetailsRes.ok) ouraData.sleepDetails = (await sleepDetailsRes.json()).data || [];
+
+        updateOuraStatus(true);
+        renderSleepChart();
+        renderReadinessChart();
+        renderHRVChart();
+        updateOuraSummary();
+        updateOuraDetails();
+        generateInsights();
+      } catch (error) {
+        console.error('Error loading Oura data:', error);
+      }
+    }
+
+    // Update Oura Summary Cards
+    function updateOuraSummary() {
+      // Readiness Score
+      if (ouraData.readiness.length) {
+        const latest = ouraData.readiness[ouraData.readiness.length - 1];
+        const score = latest.score;
+        document.getElementById('readiness-score').textContent = score;
+        document.getElementById('readiness-score').className = 'value ' + getScoreClass(score);
+
+        const bar = document.getElementById('readiness-bar');
+        bar.style.width = score + '%';
+        bar.className = 'fill ' + getBarClass(score);
+
+        if (ouraData.readiness.length > 1) {
+          const prev = ouraData.readiness[ouraData.readiness.length - 2].score;
+          const diff = score - prev;
+          const trendEl = document.getElementById('readiness-trend');
+          trendEl.textContent = diff > 0 ? `+${diff} from yesterday` : diff < 0 ? `${diff} from yesterday` : 'Same as yesterday';
+          trendEl.className = 'trend ' + (diff > 0 ? 'up' : diff < 0 ? 'down' : 'neutral');
+        }
+      }
+
+      // Sleep Score
+      if (ouraData.sleep.length) {
+        const latest = ouraData.sleep[ouraData.sleep.length - 1];
+        const score = latest.score;
+        document.getElementById('sleep-score').textContent = score;
+        document.getElementById('sleep-score').className = 'value ' + getScoreClass(score);
+
+        const bar = document.getElementById('sleep-bar');
+        bar.style.width = score + '%';
+        bar.className = 'fill ' + getBarClass(score);
+
+        if (ouraData.sleep.length > 1) {
+          const prev = ouraData.sleep[ouraData.sleep.length - 2].score;
+          const diff = score - prev;
+          const trendEl = document.getElementById('sleep-trend');
+          trendEl.textContent = diff > 0 ? `+${diff} from yesterday` : diff < 0 ? `${diff} from yesterday` : 'Same as yesterday';
+          trendEl.className = 'trend ' + (diff > 0 ? 'up' : diff < 0 ? 'down' : 'neutral');
+        }
+      }
+
+      // HRV from readiness contributors
+      if (ouraData.readiness.length) {
+        const latest = ouraData.readiness[ouraData.readiness.length - 1];
+        if (latest.contributors?.hrv_balance !== undefined) {
+          document.getElementById('hrv-value').innerHTML = latest.contributors.hrv_balance + '<span class="unit"> score</span>';
+        }
+      }
+
+      // Resting HR from sleep details
+      if (ouraData.sleepDetails && ouraData.sleepDetails.length) {
+        const latest = ouraData.sleepDetails[ouraData.sleepDetails.length - 1];
+        if (latest.lowest_heart_rate) {
+          document.getElementById('resting-hr').innerHTML = latest.lowest_heart_rate + '<span class="unit"> bpm</span>';
+        }
+        if (latest.average_hrv) {
+          document.getElementById('hrv-value').innerHTML = latest.average_hrv + '<span class="unit"> ms</span>';
+
+          if (ouraData.sleepDetails.length > 1) {
+            const prev = ouraData.sleepDetails[ouraData.sleepDetails.length - 2];
+            if (prev.average_hrv) {
+              const diff = latest.average_hrv - prev.average_hrv;
+              const trendEl = document.getElementById('hrv-trend');
+              trendEl.textContent = diff > 0 ? `+${diff}ms from yesterday` : diff < 0 ? `${diff}ms from yesterday` : 'Same as yesterday';
+              trendEl.className = 'trend ' + (diff > 0 ? 'up' : diff < 0 ? 'down' : 'neutral');
+            }
+          }
+        }
+      }
+    }
+
+    // Update Strava Summary Cards
+    function updateStravaSummary() {
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const weeklyActivities = stravaData.activities.filter(a =>
+        new Date(a.start_date_local) >= weekAgo
+      );
+
+      const totalDistance = weeklyActivities.reduce((sum, a) => sum + a.distance, 0) / 1000;
+      document.getElementById('weekly-distance').innerHTML = totalDistance.toFixed(1) + '<span class="unit"> km</span>';
+      document.getElementById('weekly-activities').textContent = weeklyActivities.length;
+
+      // Calculate vs previous week
+      const twoWeeksAgo = new Date();
+      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+      const prevWeekActivities = stravaData.activities.filter(a => {
+        const date = new Date(a.start_date_local);
+        return date >= twoWeeksAgo && date < weekAgo;
+      });
+
+      const prevDistance = prevWeekActivities.reduce((sum, a) => sum + a.distance, 0) / 1000;
+      const distanceDiff = totalDistance - prevDistance;
+      const distanceTrend = document.getElementById('distance-trend');
+
+      if (prevDistance > 0) {
+        const pct = ((distanceDiff / prevDistance) * 100).toFixed(0);
+        distanceTrend.textContent = distanceDiff > 0 ? `+${pct}% vs last week` : `${pct}% vs last week`;
+        distanceTrend.className = 'trend ' + (distanceDiff > 0 ? 'up' : distanceDiff < 0 ? 'down' : 'neutral');
+      } else {
+        distanceTrend.textContent = 'First week tracked';
+        distanceTrend.className = 'trend neutral';
+      }
+
+      const activityDiff = weeklyActivities.length - prevWeekActivities.length;
+      const activitiesTrend = document.getElementById('activities-trend');
+      activitiesTrend.textContent = activityDiff > 0 ? `+${activityDiff} vs last week` : activityDiff < 0 ? `${activityDiff} vs last week` : 'Same as last week';
+      activitiesTrend.className = 'trend ' + (activityDiff > 0 ? 'up' : activityDiff < 0 ? 'down' : 'neutral');
+    }
+
+    // Update Oura Detailed Metrics
+    function updateOuraDetails() {
+      // Sleep Details
+      if (ouraData.sleepDetails && ouraData.sleepDetails.length) {
+        const latest = ouraData.sleepDetails[ouraData.sleepDetails.length - 1];
+
+        if (latest.total_sleep_duration) {
+          document.getElementById('total-sleep').textContent = formatDuration(latest.total_sleep_duration);
+        }
+        if (latest.time_in_bed) {
+          document.getElementById('time-in-bed').textContent = formatDuration(latest.time_in_bed);
+        }
+        if (latest.efficiency) {
+          document.getElementById('sleep-efficiency').textContent = latest.efficiency + '%';
+        }
+        if (latest.deep_sleep_duration) {
+          document.getElementById('deep-sleep').textContent = formatDurationShort(latest.deep_sleep_duration);
+        }
+        if (latest.rem_sleep_duration) {
+          document.getElementById('rem-sleep').textContent = formatDurationShort(latest.rem_sleep_duration);
+        }
+        if (latest.light_sleep_duration) {
+          document.getElementById('light-sleep').textContent = formatDurationShort(latest.light_sleep_duration);
+        }
+        if (latest.awake_time) {
+          document.getElementById('awake-time').textContent = formatDurationShort(latest.awake_time);
+        }
+      }
+
+      // Readiness Contributors
+      if (ouraData.readiness.length) {
+        const latest = ouraData.readiness[ouraData.readiness.length - 1];
+        const c = latest.contributors || {};
+
+        if (c.previous_night !== undefined) document.getElementById('contrib-sleep').textContent = c.previous_night;
+        if (c.sleep_balance !== undefined) document.getElementById('contrib-sleep-balance').textContent = c.sleep_balance;
+        if (c.previous_day_activity !== undefined) document.getElementById('contrib-activity').textContent = c.previous_day_activity;
+        if (c.activity_balance !== undefined) document.getElementById('contrib-activity-balance').textContent = c.activity_balance;
+        if (c.body_temperature !== undefined) document.getElementById('contrib-temp').textContent = c.body_temperature;
+        if (c.recovery_index !== undefined) document.getElementById('contrib-recovery').textContent = c.recovery_index;
+      }
+
+      // Activity Details
+      if (ouraData.activity.length) {
+        const latest = ouraData.activity[ouraData.activity.length - 1];
+
+        if (latest.steps !== undefined) document.getElementById('daily-steps').textContent = latest.steps.toLocaleString();
+        if (latest.active_calories !== undefined) document.getElementById('active-calories').textContent = latest.active_calories + ' kcal';
+        if (latest.total_calories !== undefined) document.getElementById('total-calories').textContent = latest.total_calories + ' kcal';
+        if (latest.low_activity_time !== undefined) document.getElementById('low-activity').textContent = formatDurationShort(latest.low_activity_time);
+        if (latest.medium_activity_time !== undefined) document.getElementById('medium-activity').textContent = formatDurationShort(latest.medium_activity_time);
+        if (latest.high_activity_time !== undefined) document.getElementById('high-activity').textContent = formatDurationShort(latest.high_activity_time);
+      }
+    }
+
+    // Update Strava Detailed Metrics
+    function updateStravaDetails() {
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const weeklyActivities = stravaData.activities.filter(a =>
+        new Date(a.start_date_local) >= weekAgo
+      );
+
+      const totalDistance = weeklyActivities.reduce((sum, a) => sum + a.distance, 0) / 1000;
+      const totalTime = weeklyActivities.reduce((sum, a) => sum + a.moving_time, 0);
+      const totalElevation = weeklyActivities.reduce((sum, a) => sum + (a.total_elevation_gain || 0), 0);
+
+      document.getElementById('strava-week-distance').textContent = totalDistance.toFixed(1) + ' km';
+      document.getElementById('strava-week-time').textContent = formatDuration(totalTime);
+      document.getElementById('strava-week-elevation').textContent = Math.round(totalElevation) + ' m';
+
+      // Average HR
+      const activitiesWithHR = weeklyActivities.filter(a => a.average_heartrate);
+      if (activitiesWithHR.length) {
+        const avgHR = activitiesWithHR.reduce((sum, a) => sum + a.average_heartrate, 0) / activitiesWithHR.length;
+        document.getElementById('strava-avg-hr').textContent = Math.round(avgHR) + ' bpm';
+      }
+
+      // Longest activity
+      if (weeklyActivities.length) {
+        const longest = weeklyActivities.reduce((max, a) => a.distance > max.distance ? a : max);
+        document.getElementById('strava-longest').textContent = (longest.distance / 1000).toFixed(1) + ' km';
+      }
+
+      // Activity types
+      const types = [...new Set(weeklyActivities.map(a => a.type))];
+      document.getElementById('strava-types').textContent = types.join(', ') || '--';
+    }
+
+    function formatDuration(seconds) {
+      const hours = Math.floor(seconds / 3600);
+      const mins = Math.floor((seconds % 3600) / 60);
+      if (hours > 0) {
+        return `${hours}h ${mins}m`;
+      }
+      return `${mins}m`;
+    }
+
+    function formatDurationShort(seconds) {
+      const hours = Math.floor(seconds / 3600);
+      const mins = Math.floor((seconds % 3600) / 60);
+      if (hours > 0) {
+        return `${hours}h${mins > 0 ? mins + 'm' : ''}`;
+      }
+      return `${mins}m`;
+    }
+
+    function getScoreClass(score) {
+      if (score >= 85) return 'score-excellent';
+      if (score >= 70) return 'score-good';
+      if (score >= 50) return 'score-fair';
+      return 'score-poor';
+    }
+
+    function getBarClass(score) {
+      if (score >= 85) return 'excellent';
+      if (score >= 70) return 'good';
+      if (score >= 50) return 'fair';
+      return 'poor';
+    }
+
+    // Render Activities List
+    function renderActivities() {
+      const list = document.getElementById('activity-list');
+
+      if (!stravaData.activities || !stravaData.activities.length) {
+        list.innerHTML = '<div class="empty-state"><div class="icon">🏃</div><p>No recent activities</p></div>';
+        return;
+      }
+
+      list.innerHTML = stravaData.activities.slice(0, 12).map(activity => {
+        const date = new Date(activity.start_date_local).toLocaleDateString('en-US', {
+          weekday: 'short', month: 'short', day: 'numeric'
+        });
+        const distance = (activity.distance / 1000).toFixed(1);
+        const duration = Math.floor(activity.moving_time / 60);
+        const type = activity.type;
+        const pace = activity.distance > 0 ? ((activity.moving_time / 60) / (activity.distance / 1000)).toFixed(1) : '--';
+
+        return `
+          <div class="activity-item">
+            <div class="activity-info">
+              <h3>${activity.name}</h3>
+              <p>${type} • ${date}${activity.average_heartrate ? ' • ' + Math.round(activity.average_heartrate) + ' bpm avg' : ''}</p>
+            </div>
+            <div class="activity-stats">
+              <div class="distance">${distance} km</div>
+              <div class="time">${duration} min${type === 'Run' ? ' • ' + pace + ' min/km' : ''}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Render Sleep Chart
+    function renderSleepChart() {
+      const ctx = document.getElementById('sleep-chart').getContext('2d');
+      const data = ouraData.sleep.slice(-14);
+
+      if (window.sleepChart) window.sleepChart.destroy();
+
+      window.sleepChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.map(d => {
+            const date = new Date(d.day);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          }),
+          datasets: [{
+            label: 'Sleep Score',
+            data: data.map(d => d.score),
+            backgroundColor: data.map(d => {
+              if (d.score >= 85) return 'rgba(16, 185, 129, 0.8)';
+              if (d.score >= 70) return 'rgba(52, 211, 153, 0.8)';
+              if (d.score >= 50) return 'rgba(251, 191, 36, 0.8)';
+              return 'rgba(248, 113, 113, 0.8)';
+            }),
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              grid: { color: 'rgba(0,0,0,0.05)' },
+              ticks: { color: '#666' }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#666' }
+            }
+          }
+        }
+      });
+    }
+
+    // Render Readiness Chart
+    function renderReadinessChart() {
+      const ctx = document.getElementById('readiness-chart').getContext('2d');
+      const data = ouraData.readiness.slice(-14);
+
+      if (window.readinessChart) window.readinessChart.destroy();
+
+      window.readinessChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.map(d => {
+            const date = new Date(d.day);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          }),
+          datasets: [{
+            label: 'Readiness',
+            data: data.map(d => d.score),
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4,
+            pointBackgroundColor: '#667eea'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              grid: { color: 'rgba(0,0,0,0.05)' },
+              ticks: { color: '#666' }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#666' }
+            }
+          }
+        }
+      });
+    }
+
+    // Render HRV Chart
+    function renderHRVChart() {
+      const ctx = document.getElementById('hrv-chart').getContext('2d');
+      const data = ouraData.sleepDetails ? ouraData.sleepDetails.slice(-14) : [];
+
+      if (window.hrvChart) window.hrvChart.destroy();
+
+      if (!data.length || !data[0].average_hrv) {
+        // No HRV data available
+        return;
+      }
+
+      window.hrvChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.map(d => {
+            const date = new Date(d.day);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          }),
+          datasets: [{
+            label: 'HRV (ms)',
+            data: data.map(d => d.average_hrv),
+            borderColor: '#ec4899',
+            backgroundColor: 'rgba(236, 72, 153, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4,
+            pointBackgroundColor: '#ec4899'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              grid: { color: 'rgba(0,0,0,0.05)' },
+              ticks: { color: '#666' }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#666' }
+            }
+          }
+        }
+      });
+    }
+
+    // Render Activity Chart
+    function renderActivityChart() {
+      const ctx = document.getElementById('activity-chart').getContext('2d');
+
+      if (!stravaData.activities || !stravaData.activities.length) return;
+
+      // Group activities by week
+      const weeks = {};
+      stravaData.activities.forEach(a => {
+        const date = new Date(a.start_date_local);
+        const weekStart = new Date(date);
+        weekStart.setDate(date.getDate() - date.getDay());
+        const key = weekStart.toISOString().split('T')[0];
+
+        if (!weeks[key]) {
+          weeks[key] = { distance: 0, duration: 0, count: 0 };
+        }
+        weeks[key].distance += a.distance / 1000;
+        weeks[key].duration += a.moving_time / 3600;
+        weeks[key].count++;
+      });
+
+      const sortedWeeks = Object.entries(weeks)
+        .sort(([a], [b]) => new Date(a) - new Date(b))
+        .slice(-8);
+
+      if (window.activityChart) window.activityChart.destroy();
+
+      window.activityChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: sortedWeeks.map(([date]) => {
+            const d = new Date(date);
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          }),
+          datasets: [{
+            label: 'Distance (km)',
+            data: sortedWeeks.map(([, data]) => data.distance.toFixed(1)),
+            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+            borderRadius: 6
+          }, {
+            label: 'Duration (hrs)',
+            data: sortedWeeks.map(([, data]) => data.duration.toFixed(1)),
+            backgroundColor: 'rgba(16, 185, 129, 0.8)',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#666' } }
+          },
+          scales: {
+            y: {
+              grid: { color: 'rgba(0,0,0,0.05)' },
+              ticks: { color: '#666' }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#666' }
+            }
+          }
+        }
+      });
+    }
+
+    // Generate Insights
+    function generateInsights() {
+      const insights = [];
+
+      // Sleep insights
+      if (ouraData.sleep.length >= 7) {
+        const recentSleep = ouraData.sleep.slice(-7);
+        const avgScore = recentSleep.reduce((sum, d) => sum + d.score, 0) / recentSleep.length;
+        const lowSleepDays = recentSleep.filter(d => d.score < 70).length;
+
+        if (avgScore >= 80) {
+          insights.push({
+            type: 'positive',
+            title: 'Excellent Sleep Quality',
+            text: `Your average sleep score this week is ${avgScore.toFixed(0)}. Great job maintaining healthy sleep habits!`,
+            recommendation: 'Keep up your consistent sleep schedule.'
+          });
+        } else if (lowSleepDays >= 3) {
+          insights.push({
+            type: 'negative',
+            title: 'Sleep Needs Attention',
+            text: `You had ${lowSleepDays} days with sleep scores below 70 this week. Poor sleep affects recovery and performance.`,
+            recommendation: 'Try going to bed 30 minutes earlier and limit screen time before sleep.'
+          });
+        }
+      }
+
+      // HRV insights
+      if (ouraData.sleepDetails && ouraData.sleepDetails.length >= 7) {
+        const recent = ouraData.sleepDetails.slice(-7).filter(d => d.average_hrv);
+        if (recent.length >= 5) {
+          const avgHRV = recent.reduce((sum, d) => sum + d.average_hrv, 0) / recent.length;
+          const latest = recent[recent.length - 1].average_hrv;
+
+          if (latest > avgHRV * 1.1) {
+            insights.push({
+              type: 'positive',
+              title: 'HRV Above Average',
+              text: `Your HRV is ${Math.round((latest/avgHRV - 1) * 100)}% above your weekly average. Your nervous system is well-recovered.`,
+              recommendation: 'Great day for a challenging workout!'
+            });
+          } else if (latest < avgHRV * 0.85) {
+            insights.push({
+              type: 'negative',
+              title: 'HRV Below Baseline',
+              text: `Your HRV is ${Math.round((1 - latest/avgHRV) * 100)}% below your weekly average, indicating stress or incomplete recovery.`,
+              recommendation: 'Consider lighter activity and prioritize recovery today.'
+            });
+          }
+        }
+      }
+
+      // Training consistency
+      if (stravaData.activities && stravaData.activities.length >= 7) {
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        const thisWeek = stravaData.activities.filter(a => new Date(a.start_date_local) >= weekAgo);
+
+        if (thisWeek.length >= 4) {
+          insights.push({
+            type: 'positive',
+            title: 'Strong Training Consistency',
+            text: `You completed ${thisWeek.length} workouts this week. Consistency is the foundation of fitness improvement!`,
+            recommendation: 'Balance this with adequate recovery based on your readiness scores.'
+          });
+        } else if (thisWeek.length <= 1) {
+          insights.push({
+            type: 'negative',
+            title: 'Training Volume Low',
+            text: `Only ${thisWeek.length} workout${thisWeek.length === 1 ? '' : 's'} recorded this week.`,
+            recommendation: 'Aim for 3-4 sessions per week for optimal fitness maintenance.'
+          });
+        }
+      }
+
+      // Readiness-based recommendation
+      if (ouraData.readiness.length) {
+        const latest = ouraData.readiness[ouraData.readiness.length - 1];
+        if (latest.score >= 85) {
+          insights.push({
+            type: 'positive',
+            title: 'Peak Performance Day',
+            text: `Readiness score of ${latest.score} indicates excellent recovery. Your body is primed for performance.`,
+            recommendation: 'Ideal day for a hard workout or race!'
+          });
+        } else if (latest.score < 60) {
+          insights.push({
+            type: 'negative',
+            title: 'Recovery Day Advised',
+            text: `Readiness score of ${latest.score} suggests your body needs rest. Pushing hard today may lead to overtraining.`,
+            recommendation: 'Opt for light activity like walking, yoga, or stretching.'
+          });
+        }
+      }
+
+      // Default if no insights
+      if (insights.length === 0) {
+        insights.push({
+          type: 'neutral',
+          title: 'Connect Your Data',
+          text: 'Connect both Oura and Strava to see personalized insights about your sleep, recovery, and training patterns.',
+          recommendation: 'The more data available, the better the recommendations!'
+        });
+      }
+
+      renderInsights(insights);
+    }
+
+    function renderInsights(insights) {
+      const grid = document.getElementById('insights-grid');
+      grid.innerHTML = insights.map(insight => `
+        <div class="insight-card ${insight.type}">
+          <h3>${insight.title}</h3>
+          <p>${insight.text}</p>
+          <div class="recommendation">💡 ${insight.recommendation}</div>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>
