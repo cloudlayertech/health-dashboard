@@ -19,16 +19,21 @@ function getBaseUrl(req) {
   return `${protocol}://${host}`;
 }
 
-// Store tokens in memory (in production, use a database)
+// Store tokens in memory, initialized from environment variables
 let stravaTokens = {
-  access_token: process.env.STRAVA_ACCESS_TOKEN,
-  refresh_token: process.env.STRAVA_REFRESH_TOKEN
+  access_token: process.env.STRAVA_ACCESS_TOKEN || null,
+  refresh_token: process.env.STRAVA_REFRESH_TOKEN || null
 };
 
 let ouraTokens = {
-  access_token: null,
-  refresh_token: null
+  access_token: process.env.OURA_ACCESS_TOKEN || null,
+  refresh_token: process.env.OURA_REFRESH_TOKEN || null
 };
+
+// Log token status on startup
+console.log('Token status on startup:');
+console.log('  Strava:', stravaTokens.access_token ? 'loaded from env' : 'not set');
+console.log('  Oura:', ouraTokens.access_token ? 'loaded from env' : 'not set');
 
 // ============== STRAVA API ==============
 
@@ -52,6 +57,10 @@ app.get('/callback/strava', async (req, res) => {
     stravaTokens.access_token = response.data.access_token;
     stravaTokens.refresh_token = response.data.refresh_token;
     console.log('Strava connected! Scopes:', response.data.scope);
+    console.log('\n=== STRAVA TOKENS (add these to Render environment variables) ===');
+    console.log('STRAVA_ACCESS_TOKEN=' + response.data.access_token);
+    console.log('STRAVA_REFRESH_TOKEN=' + response.data.refresh_token);
+    console.log('===============================================================\n');
     res.redirect('/?strava=connected');
   } catch (error) {
     console.error('Strava OAuth error:', error.response?.data || error.message);
@@ -163,6 +172,10 @@ app.get('/callback/oura', async (req, res) => {
     ouraTokens.access_token = response.data.access_token;
     ouraTokens.refresh_token = response.data.refresh_token;
     console.log('Oura connected successfully!');
+    console.log('\n=== OURA TOKENS (add these to Render environment variables) ===');
+    console.log('OURA_ACCESS_TOKEN=' + response.data.access_token);
+    console.log('OURA_REFRESH_TOKEN=' + response.data.refresh_token);
+    console.log('==============================================================\n');
     res.redirect('/?oura=connected');
   } catch (error) {
     const errorMsg = error.response?.data?.detail || error.response?.data?.error || error.message;
