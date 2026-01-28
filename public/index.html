@@ -454,6 +454,232 @@
     .progress-bar .fill.good { background: linear-gradient(90deg, #34d399, #6ee7b7); }
     .progress-bar .fill.fair { background: linear-gradient(90deg, #fbbf24, #fcd34d); }
     .progress-bar .fill.poor { background: linear-gradient(90deg, #f87171, #fca5a5); }
+
+    /* AI Section Styles */
+    .ai-section {
+      margin-top: 30px;
+      margin-bottom: 30px;
+    }
+
+    .ai-section h2 {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #1a1a2e;
+    }
+
+    .ai-summary-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      color: white;
+      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .ai-summary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .ai-summary-header h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .refresh-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: background 0.2s;
+    }
+
+    .refresh-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .ai-summary-content {
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    .ai-summary-content.loading {
+      opacity: 0.7;
+      font-style: italic;
+    }
+
+    .ai-placeholder {
+      opacity: 0.8;
+      font-style: italic;
+    }
+
+    .ai-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 1000px) {
+      .ai-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .ai-chat-card, .ai-trends-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border: 1px solid #e0e4e8;
+    }
+
+    .ai-chat-card h3, .ai-trends-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      color: #1a1a2e;
+    }
+
+    .chat-messages {
+      height: 300px;
+      overflow-y: auto;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: #f8fafc;
+      border-radius: 12px;
+    }
+
+    .chat-message {
+      margin-bottom: 12px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      max-width: 85%;
+    }
+
+    .chat-message.user {
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      color: white;
+      margin-left: auto;
+    }
+
+    .chat-message.ai {
+      background: white;
+      border: 1px solid #e0e4e8;
+      color: #1a1a2e;
+    }
+
+    .chat-message p {
+      margin: 0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .chat-input-container {
+      display: flex;
+      gap: 10px;
+    }
+
+    #chat-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid #e0e4e8;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    #chat-input:focus {
+      border-color: #667eea;
+    }
+
+    .send-btn {
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .send-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .ai-trends-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .analyze-btn {
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .analyze-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .analyze-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .ai-trends-content {
+      padding: 16px;
+      background: #f8fafc;
+      border-radius: 12px;
+      max-height: 350px;
+      overflow-y: auto;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .ai-trends-content h4 {
+      color: #667eea;
+      margin: 16px 0 8px 0;
+      font-size: 1rem;
+    }
+
+    .ai-trends-content h4:first-child {
+      margin-top: 0;
+    }
+
+    .ai-trends-content ul {
+      margin: 8px 0;
+      padding-left: 20px;
+    }
+
+    .ai-trends-content li {
+      margin-bottom: 6px;
+    }
   </style>
 </head>
 <body>
@@ -696,6 +922,49 @@
         </div>
       </div>
     </div>
+
+    <!-- AI Section -->
+    <div class="ai-section">
+      <h2><span class="icon">🤖</span> AI Health Assistant</h2>
+
+      <!-- Daily AI Summary -->
+      <div class="ai-summary-card" id="ai-summary-card">
+        <div class="ai-summary-header">
+          <h3>Today's Briefing</h3>
+          <button class="refresh-btn" id="refresh-summary" title="Refresh summary">↻</button>
+        </div>
+        <div class="ai-summary-content" id="ai-summary-content">
+          <p class="ai-placeholder">Connect your data to get your personalized daily briefing.</p>
+        </div>
+      </div>
+
+      <div class="ai-grid">
+        <!-- AI Chat -->
+        <div class="ai-chat-card">
+          <h3>Ask AI About Your Health</h3>
+          <div class="chat-messages" id="chat-messages">
+            <div class="chat-message ai">
+              <p>Hi! I'm your AI health assistant. Ask me anything about your sleep, recovery, or training - like "Why was my HRV low yesterday?" or "Should I do a hard workout today?"</p>
+            </div>
+          </div>
+          <div class="chat-input-container">
+            <input type="text" id="chat-input" placeholder="Ask about your health data..." />
+            <button id="send-chat" class="send-btn">Send</button>
+          </div>
+        </div>
+
+        <!-- AI Trend Analysis -->
+        <div class="ai-trends-card">
+          <div class="ai-trends-header">
+            <h3>Trend Analysis</h3>
+            <button class="analyze-btn" id="analyze-trends">Analyze My Trends</button>
+          </div>
+          <div class="ai-trends-content" id="ai-trends-content">
+            <p class="ai-placeholder">Click "Analyze My Trends" to get AI-powered insights about your patterns over time.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -816,6 +1085,7 @@
         updateStravaSummary();
         updateStravaDetails();
         generateInsights();
+        triggerAISummary();
       } catch (error) {
         console.error('Error loading Strava data:', error);
       }
@@ -843,6 +1113,7 @@
         updateOuraSummary();
         updateOuraDetails();
         generateInsights();
+        triggerAISummary();
       } catch (error) {
         console.error('Error loading Oura data:', error);
       }
@@ -1442,6 +1713,181 @@
           <div class="recommendation">💡 ${insight.recommendation}</div>
         </div>
       `).join('');
+    }
+
+    // ============== AI FEATURES ==============
+
+    // Get current health data for AI context
+    function getHealthDataForAI() {
+      return {
+        oura: {
+          sleep: ouraData.sleep,
+          readiness: ouraData.readiness,
+          activity: ouraData.activity,
+          sleepDetails: ouraData.sleepDetails
+        },
+        strava: {
+          activities: stravaData.activities
+        }
+      };
+    }
+
+    // Load AI Daily Summary
+    async function loadAISummary() {
+      const summaryContent = document.getElementById('ai-summary-content');
+
+      // Check if we have data
+      if (!ouraData.readiness.length && !stravaData.activities.length) {
+        summaryContent.innerHTML = '<p class="ai-placeholder">Connect your data to get your personalized daily briefing.</p>';
+        return;
+      }
+
+      summaryContent.innerHTML = '<p class="loading">Generating your daily briefing...</p>';
+      summaryContent.classList.add('loading');
+
+      try {
+        const response = await fetch('/api/ai/daily-summary', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ healthData: getHealthDataForAI() })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          summaryContent.innerHTML = `<p class="ai-placeholder">${data.error}</p>`;
+        } else {
+          summaryContent.innerHTML = `<p>${data.summary}</p>`;
+        }
+      } catch (error) {
+        summaryContent.innerHTML = '<p class="ai-placeholder">Unable to generate summary. Please try again.</p>';
+      }
+
+      summaryContent.classList.remove('loading');
+    }
+
+    // AI Chat functionality
+    async function sendChatMessage() {
+      const input = document.getElementById('chat-input');
+      const messagesContainer = document.getElementById('chat-messages');
+      const sendBtn = document.getElementById('send-chat');
+      const message = input.value.trim();
+
+      if (!message) return;
+
+      // Add user message
+      messagesContainer.innerHTML += `
+        <div class="chat-message user">
+          <p>${message}</p>
+        </div>
+      `;
+
+      input.value = '';
+      sendBtn.disabled = true;
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+      // Add loading message
+      const loadingId = 'loading-' + Date.now();
+      messagesContainer.innerHTML += `
+        <div class="chat-message ai" id="${loadingId}">
+          <p>Thinking...</p>
+        </div>
+      `;
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+      try {
+        const response = await fetch('/api/ai/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: message,
+            healthData: getHealthDataForAI()
+          })
+        });
+
+        const data = await response.json();
+        const loadingEl = document.getElementById(loadingId);
+
+        if (data.error) {
+          loadingEl.innerHTML = `<p>${data.error}</p>`;
+        } else {
+          loadingEl.innerHTML = `<p>${data.response}</p>`;
+        }
+      } catch (error) {
+        const loadingEl = document.getElementById(loadingId);
+        loadingEl.innerHTML = '<p>Sorry, I encountered an error. Please try again.</p>';
+      }
+
+      sendBtn.disabled = false;
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // AI Trend Analysis
+    async function analyzeTrends() {
+      const trendsContent = document.getElementById('ai-trends-content');
+      const analyzeBtn = document.getElementById('analyze-trends');
+
+      // Check if we have data
+      if (!ouraData.readiness.length && !stravaData.activities.length) {
+        trendsContent.innerHTML = '<p class="ai-placeholder">Connect your data first to analyze trends.</p>';
+        return;
+      }
+
+      trendsContent.innerHTML = '<p>Analyzing your health patterns...</p>';
+      analyzeBtn.disabled = true;
+
+      try {
+        const response = await fetch('/api/ai/trends', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ healthData: getHealthDataForAI() })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          trendsContent.innerHTML = `<p class="ai-placeholder">${data.error}</p>`;
+        } else {
+          // Convert markdown-style formatting to HTML
+          let html = data.analysis
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/^### (.*$)/gm, '<h4>$1</h4>')
+            .replace(/^## (.*$)/gm, '<h4>$1</h4>')
+            .replace(/^# (.*$)/gm, '<h4>$1</h4>')
+            .replace(/^\d+\. \*\*(.*?)\*\*:/gm, '<h4>$1</h4>')
+            .replace(/^- (.*$)/gm, '<li>$1</li>')
+            .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>');
+          trendsContent.innerHTML = `<div>${html}</div>`;
+        }
+      } catch (error) {
+        trendsContent.innerHTML = '<p class="ai-placeholder">Unable to analyze trends. Please try again.</p>';
+      }
+
+      analyzeBtn.disabled = false;
+    }
+
+    // Initialize AI event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      // Chat
+      document.getElementById('send-chat').addEventListener('click', sendChatMessage);
+      document.getElementById('chat-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendChatMessage();
+      });
+
+      // Summary refresh
+      document.getElementById('refresh-summary').addEventListener('click', loadAISummary);
+
+      // Trend analysis
+      document.getElementById('analyze-trends').addEventListener('click', analyzeTrends);
+    });
+
+    // Auto-load AI summary when data is loaded
+    function triggerAISummary() {
+      if (ouraData.readiness.length > 0 || stravaData.activities.length > 0) {
+        loadAISummary();
+      }
     }
   </script>
 </body>
