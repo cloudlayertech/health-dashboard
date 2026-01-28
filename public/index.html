@@ -786,6 +786,10 @@
         badge.classList.remove('disconnected');
         badge.classList.add('connected');
         badge.innerHTML = '<span class="status-dot green"></span><span>Oura Connected</span>';
+      } else {
+        badge.classList.remove('connected');
+        badge.classList.add('disconnected');
+        badge.innerHTML = '<span class="status-dot red"></span><span>Oura</span><button class="connect-btn" onclick="connectOura()">Reconnect</button>';
       }
     }
 
@@ -833,10 +837,24 @@
           fetch('/api/oura/sleep-details')
         ]);
 
+        // Check if any request failed with 401 (token expired)
+        if (sleepRes.status === 401 || readinessRes.status === 401) {
+          console.log('Oura token expired, need to reconnect');
+          updateOuraStatus(false);
+          return;
+        }
+
         if (sleepRes.ok) ouraData.sleep = (await sleepRes.json()).data || [];
         if (readinessRes.ok) ouraData.readiness = (await readinessRes.json()).data || [];
         if (activityRes.ok) ouraData.activity = (await activityRes.json()).data || [];
         if (sleepDetailsRes.ok) ouraData.sleepDetails = (await sleepDetailsRes.json()).data || [];
+
+        // Check if we actually got data
+        if (!ouraData.sleep.length && !ouraData.readiness.length) {
+          console.log('No Oura data received');
+          updateOuraStatus(false);
+          return;
+        }
 
         updateOuraStatus(true);
         renderSleepChart();
@@ -847,6 +865,7 @@
         generateInsights();
       } catch (error) {
         console.error('Error loading Oura data:', error);
+        updateOuraStatus(false);
       }
     }
 
