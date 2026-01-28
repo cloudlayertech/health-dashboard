@@ -31,6 +31,23 @@
       --radius-md: 12px;
       --radius-lg: 16px;
       --radius-xl: 24px;
+      --chart-text: #a0a0a8;
+      --chart-grid: rgba(255,255,255,0.08);
+    }
+
+    /* Light Theme */
+    [data-theme="light"] {
+      --bg-primary: #f5f7fa;
+      --bg-secondary: #edf0f5;
+      --bg-card: #ffffff;
+      --bg-elevated: #f0f2f5;
+      --text-primary: #1a1a2e;
+      --text-secondary: #5a5a72;
+      --text-muted: #8a8a9a;
+      --border: rgba(0,0,0,0.08);
+      --shadow: 0 4px 24px rgba(0,0,0,0.08);
+      --chart-text: #5a5a72;
+      --chart-grid: rgba(0,0,0,0.06);
     }
 
     * {
@@ -112,6 +129,58 @@
       text-align: center;
       padding: 24px 16px 32px;
       position: relative;
+    }
+
+    /* Theme Toggle */
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 100;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: var(--shadow);
+      border-color: var(--accent-primary);
+    }
+
+    .theme-toggle svg {
+      width: 22px;
+      height: 22px;
+      fill: var(--text-secondary);
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle:hover svg {
+      fill: var(--accent-primary);
+    }
+
+    .theme-toggle .sun-icon {
+      display: none;
+    }
+
+    .theme-toggle .moon-icon {
+      display: block;
+    }
+
+    [data-theme="light"] .theme-toggle .sun-icon {
+      display: block;
+    }
+
+    [data-theme="light"] .theme-toggle .moon-icon {
+      display: none;
     }
 
     header h1 {
@@ -418,85 +487,179 @@
     .trend.down { color: var(--danger); background: rgba(239, 68, 68, 0.15); }
     .trend.neutral { color: var(--text-muted); }
 
-    /* Weekly Heat Map */
+    /* Weekly Overview - Premium Design */
     .weekly-heatmap {
-      background: var(--bg-card);
+      background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
       border-radius: var(--radius-xl);
-      padding: 20px;
+      padding: 24px;
       margin-bottom: 24px;
       border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .weekly-heatmap::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary));
     }
 
     .heatmap-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
 
     .heatmap-header h3 {
-      font-size: 0.9rem;
-      font-weight: 600;
+      font-size: 1rem;
+      font-weight: 700;
       color: var(--text-primary);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+    }
+
+    .heatmap-header h3::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--accent-primary);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
     }
 
     .heatmap-legend {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       font-size: 0.7rem;
       color: var(--text-muted);
+      background: var(--bg-elevated);
+      padding: 6px 12px;
+      border-radius: 20px;
     }
 
     .legend-block {
-      width: 12px;
-      height: 12px;
-      border-radius: 3px;
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
     }
 
     .heatmap-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
+      gap: 10px;
+    }
+
+    @media (min-width: 768px) {
+      .heatmap-grid { gap: 14px; }
     }
 
     .heatmap-day {
       aspect-ratio: 1;
-      border-radius: var(--radius-sm);
+      border-radius: var(--radius-md);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       cursor: pointer;
       position: relative;
+      border: 2px solid transparent;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
     .heatmap-day:hover {
-      transform: scale(1.1);
+      transform: translateY(-4px) scale(1.05);
       z-index: 1;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
     }
 
     .heatmap-day .day-label {
       font-size: 0.65rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 2px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+      opacity: 0.8;
     }
 
     .heatmap-day .day-score {
-      font-size: 0.8rem;
-      font-weight: 700;
+      font-size: 1.1rem;
+      font-weight: 800;
     }
 
-    .heatmap-day.excellent { background: rgba(16, 185, 129, 0.3); color: var(--success); }
-    .heatmap-day.good { background: rgba(52, 211, 153, 0.2); color: #34d399; }
-    .heatmap-day.fair { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
-    .heatmap-day.poor { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
-    .heatmap-day.empty { background: var(--bg-elevated); color: var(--text-muted); }
+    @media (min-width: 768px) {
+      .heatmap-day .day-label { font-size: 0.7rem; }
+      .heatmap-day .day-score { font-size: 1.3rem; }
+    }
+
+    .heatmap-day.excellent {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.4) 100%);
+      border-color: rgba(16, 185, 129, 0.5);
+      color: var(--success);
+    }
+    .heatmap-day.excellent:hover {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.4) 0%, rgba(16, 185, 129, 0.6) 100%);
+      border-color: var(--success);
+    }
+
+    .heatmap-day.good {
+      background: linear-gradient(135deg, rgba(52, 211, 153, 0.2) 0%, rgba(52, 211, 153, 0.35) 100%);
+      border-color: rgba(52, 211, 153, 0.4);
+      color: #34d399;
+    }
+    .heatmap-day.good:hover {
+      background: linear-gradient(135deg, rgba(52, 211, 153, 0.35) 0%, rgba(52, 211, 153, 0.5) 100%);
+      border-color: #34d399;
+    }
+
+    .heatmap-day.fair {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.35) 100%);
+      border-color: rgba(245, 158, 11, 0.4);
+      color: var(--warning);
+    }
+    .heatmap-day.fair:hover {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.35) 0%, rgba(245, 158, 11, 0.5) 100%);
+      border-color: var(--warning);
+    }
+
+    .heatmap-day.poor {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.35) 100%);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: var(--danger);
+    }
+    .heatmap-day.poor:hover {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.35) 0%, rgba(239, 68, 68, 0.5) 100%);
+      border-color: var(--danger);
+    }
+
+    .heatmap-day.empty {
+      background: var(--bg-elevated);
+      border-color: var(--border);
+      color: var(--text-muted);
+    }
+    .heatmap-day.empty:hover {
+      border-color: var(--text-muted);
+    }
+
+    /* Today indicator */
+    .heatmap-day.today::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 6px;
+      height: 6px;
+      background: var(--accent-primary);
+      border-radius: 50%;
+    }
 
     /* Quick Stats Bar */
     .quick-stats {
@@ -1002,6 +1165,22 @@
 <body>
   <div class="container">
     <header>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+        <svg class="moon-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <svg class="sun-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
       <h1>Health Dashboard</h1>
       <p>Oura Ring + Strava unified view</p>
     </header>
@@ -1357,9 +1536,39 @@
     let ouraData = { sleep: [], readiness: [], activity: [], heartrate: [], sleepDetails: [] };
     let selectedDate = new Date();
 
-    // Chart.js dark theme defaults
-    Chart.defaults.color = '#a0a0a8';
-    Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
+    // Theme Management
+    function initTheme() {
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateChartColors(savedTheme);
+    }
+
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateChartColors(newTheme);
+
+      // Re-render charts with new colors
+      if (ouraData.sleep.length) renderSleepChart();
+      if (ouraData.readiness.length) renderReadinessChart();
+      if (ouraData.sleepDetails.length) renderHRVChart();
+      if (stravaData.activities.length) renderActivityChart();
+    }
+
+    function updateChartColors(theme) {
+      if (theme === 'light') {
+        Chart.defaults.color = '#5a5a72';
+        Chart.defaults.borderColor = 'rgba(0,0,0,0.06)';
+      } else {
+        Chart.defaults.color = '#a0a0a8';
+        Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
+      }
+    }
+
+    // Initialize theme on load
+    initTheme();
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
@@ -1368,6 +1577,7 @@
 
       document.getElementById('connect-strava').addEventListener('click', connectStrava);
       document.getElementById('connect-oura').addEventListener('click', connectOura);
+      document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
 
       initDateSelector();
       initModal();
@@ -1419,6 +1629,7 @@
         });
       }
 
+      const todayStr = formatDateForInput(new Date());
       grid.innerHTML = weekData.map(d => {
         let className = 'empty';
         if (d.score !== null) {
@@ -1427,8 +1638,9 @@
           else if (d.score >= 50) className = 'fair';
           else className = 'poor';
         }
+        const isToday = d.date === todayStr;
         return `
-          <div class="heatmap-day ${className}" onclick="selectDate('${d.date}')">
+          <div class="heatmap-day ${className}${isToday ? ' today' : ''}" onclick="selectDate('${d.date}')">
             <span class="day-label">${d.day}</span>
             <span class="day-score">${d.score !== null ? d.score : '--'}</span>
           </div>
