@@ -1207,14 +1207,20 @@
     // Render HRV Chart
     function renderHRVChart() {
       const ctx = document.getElementById('hrv-chart').getContext('2d');
-      const data = ouraData.sleepDetails ? ouraData.sleepDetails.slice(-14) : [];
+      let data = ouraData.sleepDetails ? ouraData.sleepDetails.slice(-14) : [];
 
       if (window.hrvChart) window.hrvChart.destroy();
 
-      if (!data.length || !data[0].average_hrv) {
+      // Filter to only entries with HRV data
+      data = data.filter(d => d.average_hrv !== undefined && d.average_hrv !== null);
+
+      if (!data.length) {
         // No HRV data available
+        console.log('No HRV data available in sleepDetails');
         return;
       }
+
+      console.log('HRV data for chart:', data.map(d => ({ day: d.day, hrv: d.average_hrv })));
 
       window.hrvChart = new Chart(ctx, {
         type: 'line',
