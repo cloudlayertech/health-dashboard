@@ -455,6 +455,164 @@
     .progress-bar .fill.fair { background: linear-gradient(90deg, #fbbf24, #fcd34d); }
     .progress-bar .fill.poor { background: linear-gradient(90deg, #f87171, #fca5a5); }
 
+    /* Date Selector */
+    .date-selector {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding: 16px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .date-selector label {
+      font-weight: 600;
+      color: #666;
+    }
+
+    .date-selector input[type="date"] {
+      padding: 10px 16px;
+      border: 2px solid #e0e4e8;
+      border-radius: 8px;
+      font-size: 1rem;
+      color: #1a1a2e;
+      cursor: pointer;
+    }
+
+    .date-selector input[type="date"]:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .date-nav-btn {
+      background: #f8fafc;
+      border: 2px solid #e0e4e8;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    .date-nav-btn:hover {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .today-btn {
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* Activity Detail Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .modal-header {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e0e4e8;
+    }
+
+    .modal-header h2 {
+      font-size: 1.3rem;
+      color: #1a1a2e;
+      margin-bottom: 4px;
+    }
+
+    .modal-header p {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .detail-item {
+      background: #f8fafc;
+      padding: 16px;
+      border-radius: 10px;
+    }
+
+    .detail-item .label {
+      font-size: 0.75rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .detail-item .value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    .detail-item .value .unit {
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: #666;
+    }
+
+    /* Clickable activity items */
+    .activity-item {
+      cursor: pointer;
+    }
+
+    .activity-item:hover {
+      transform: translateX(4px);
+      background: #eef2ff;
+      border-color: #667eea;
+    }
+
   </style>
 </head>
 <body>
@@ -475,6 +633,15 @@
         <span>Oura</span>
         <button class="connect-btn" id="connect-oura">Connect</button>
       </div>
+    </div>
+
+    <!-- Date Selector -->
+    <div class="date-selector">
+      <button class="date-nav-btn" id="prev-day">← Previous</button>
+      <label>View Date:</label>
+      <input type="date" id="selected-date" />
+      <button class="today-btn" id="today-btn">Today</button>
+      <button class="date-nav-btn" id="next-day">Next →</button>
     </div>
 
     <!-- Summary Cards -->
@@ -700,10 +867,24 @@
 
   </div>
 
+  <!-- Activity Detail Modal -->
+  <div class="modal-overlay" id="activity-modal">
+    <div class="modal-content">
+      <button class="modal-close" id="modal-close">&times;</button>
+      <div class="modal-header">
+        <h2 id="modal-title">Activity Details</h2>
+        <p id="modal-subtitle"></p>
+      </div>
+      <div class="detail-grid" id="modal-details">
+      </div>
+    </div>
+  </div>
+
   <script>
     // Global data storage
     let stravaData = { activities: [], athlete: null };
     let ouraData = { sleep: [], readiness: [], activity: [], heartrate: [], sleepDetails: [] };
+    let selectedDate = new Date();
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
@@ -712,6 +893,12 @@
 
       document.getElementById('connect-strava').addEventListener('click', connectStrava);
       document.getElementById('connect-oura').addEventListener('click', connectOura);
+
+      // Initialize date selector
+      initDateSelector();
+
+      // Initialize modal
+      initModal();
 
       // Check URL params for connection status
       const params = new URLSearchParams(window.location.search);
@@ -726,6 +913,348 @@
         history.replaceState({}, '', '/');
       }
     });
+
+    // Date Selector Functions
+    function initDateSelector() {
+      const dateInput = document.getElementById('selected-date');
+      const prevBtn = document.getElementById('prev-day');
+      const nextBtn = document.getElementById('next-day');
+      const todayBtn = document.getElementById('today-btn');
+
+      // Set initial date to today
+      dateInput.value = formatDateForInput(selectedDate);
+
+      dateInput.addEventListener('change', (e) => {
+        selectedDate = new Date(e.target.value + 'T12:00:00');
+        updateDisplayForDate();
+      });
+
+      prevBtn.addEventListener('click', () => {
+        selectedDate.setDate(selectedDate.getDate() - 1);
+        dateInput.value = formatDateForInput(selectedDate);
+        updateDisplayForDate();
+      });
+
+      nextBtn.addEventListener('click', () => {
+        selectedDate.setDate(selectedDate.getDate() + 1);
+        dateInput.value = formatDateForInput(selectedDate);
+        updateDisplayForDate();
+      });
+
+      todayBtn.addEventListener('click', () => {
+        selectedDate = new Date();
+        dateInput.value = formatDateForInput(selectedDate);
+        updateDisplayForDate();
+      });
+    }
+
+    function formatDateForInput(date) {
+      return date.toISOString().split('T')[0];
+    }
+
+    function updateDisplayForDate() {
+      updateOuraSummaryForDate(selectedDate);
+      updateStravaForDate(selectedDate);
+    }
+
+    function updateOuraSummaryForDate(date) {
+      const dateStr = formatDateForInput(date);
+
+      // Find data for selected date
+      const readiness = ouraData.readiness.find(r => r.day === dateStr);
+      const sleep = ouraData.sleep.find(s => s.day === dateStr);
+      const sleepDetail = ouraData.sleepDetails.find(s => s.day === dateStr);
+      const activity = ouraData.activity.find(a => a.day === dateStr);
+
+      // Update Readiness
+      if (readiness) {
+        document.getElementById('readiness-score').textContent = readiness.score;
+        document.getElementById('readiness-score').className = 'value ' + getScoreClass(readiness.score);
+        document.getElementById('readiness-bar').style.width = readiness.score + '%';
+        document.getElementById('readiness-bar').className = 'fill ' + getBarClass(readiness.score);
+        document.getElementById('readiness-trend').textContent = dateStr === formatDateForInput(new Date()) ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        document.getElementById('readiness-trend').className = 'trend neutral';
+      } else {
+        document.getElementById('readiness-score').textContent = '--';
+        document.getElementById('readiness-bar').style.width = '0%';
+        document.getElementById('readiness-trend').textContent = 'No data';
+      }
+
+      // Update Sleep Score
+      if (sleep) {
+        document.getElementById('sleep-score').textContent = sleep.score;
+        document.getElementById('sleep-score').className = 'value ' + getScoreClass(sleep.score);
+        document.getElementById('sleep-bar').style.width = sleep.score + '%';
+        document.getElementById('sleep-bar').className = 'fill ' + getBarClass(sleep.score);
+        document.getElementById('sleep-trend').textContent = dateStr === formatDateForInput(new Date()) ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        document.getElementById('sleep-trend').className = 'trend neutral';
+      } else {
+        document.getElementById('sleep-score').textContent = '--';
+        document.getElementById('sleep-bar').style.width = '0%';
+        document.getElementById('sleep-trend').textContent = 'No data';
+      }
+
+      // Update HRV and Resting HR
+      if (sleepDetail) {
+        if (sleepDetail.average_hrv) {
+          document.getElementById('hrv-value').innerHTML = sleepDetail.average_hrv + '<span class="unit"> ms</span>';
+          document.getElementById('hrv-trend').textContent = dateStr === formatDateForInput(new Date()) ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        }
+        if (sleepDetail.lowest_heart_rate) {
+          document.getElementById('resting-hr').innerHTML = sleepDetail.lowest_heart_rate + '<span class="unit"> bpm</span>';
+          document.getElementById('hr-trend').textContent = dateStr === formatDateForInput(new Date()) ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        }
+
+        // Update sleep details panel
+        if (sleepDetail.total_sleep_duration) {
+          document.getElementById('total-sleep').textContent = formatDuration(sleepDetail.total_sleep_duration);
+        }
+        if (sleepDetail.time_in_bed) {
+          document.getElementById('time-in-bed').textContent = formatDuration(sleepDetail.time_in_bed);
+        }
+        if (sleepDetail.efficiency) {
+          document.getElementById('sleep-efficiency').textContent = sleepDetail.efficiency + '%';
+        }
+        if (sleepDetail.deep_sleep_duration) {
+          document.getElementById('deep-sleep').textContent = formatDurationShort(sleepDetail.deep_sleep_duration);
+        }
+        if (sleepDetail.rem_sleep_duration) {
+          document.getElementById('rem-sleep').textContent = formatDurationShort(sleepDetail.rem_sleep_duration);
+        }
+        if (sleepDetail.light_sleep_duration) {
+          document.getElementById('light-sleep').textContent = formatDurationShort(sleepDetail.light_sleep_duration);
+        }
+        if (sleepDetail.awake_time) {
+          document.getElementById('awake-time').textContent = formatDurationShort(sleepDetail.awake_time);
+        }
+      } else {
+        document.getElementById('hrv-value').innerHTML = '--<span class="unit"> ms</span>';
+        document.getElementById('resting-hr').innerHTML = '--<span class="unit"> bpm</span>';
+      }
+
+      // Update activity summary
+      if (activity) {
+        if (activity.steps !== undefined) document.getElementById('daily-steps').textContent = activity.steps.toLocaleString();
+        if (activity.active_calories !== undefined) document.getElementById('active-calories').textContent = activity.active_calories + ' kcal';
+        if (activity.total_calories !== undefined) document.getElementById('total-calories').textContent = activity.total_calories + ' kcal';
+      }
+    }
+
+    function updateStravaForDate(date) {
+      const dateStr = formatDateForInput(date);
+
+      // Find activities for selected date
+      const dayActivities = stravaData.activities.filter(a => {
+        const actDate = a.start_date_local.split('T')[0];
+        return actDate === dateStr;
+      });
+
+      // Update the activities list to show selected date's activities at top
+      renderActivitiesWithHighlight(dateStr);
+    }
+
+    // Modal Functions
+    function initModal() {
+      const modal = document.getElementById('activity-modal');
+      const closeBtn = document.getElementById('modal-close');
+
+      closeBtn.addEventListener('click', () => {
+        modal.classList.remove('active');
+      });
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
+    }
+
+    function showActivityDetail(activity) {
+      const modal = document.getElementById('activity-modal');
+      const title = document.getElementById('modal-title');
+      const subtitle = document.getElementById('modal-subtitle');
+      const details = document.getElementById('modal-details');
+
+      const date = new Date(activity.start_date_local).toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+
+      title.textContent = activity.name;
+      subtitle.textContent = `${activity.type} • ${date}`;
+
+      // Convert metrics
+      const distanceMi = (activity.distance / 1000 * 0.621371).toFixed(2);
+      const elevationFt = activity.total_elevation_gain ? Math.round(activity.total_elevation_gain * 3.28084) : null;
+      const avgSpeedMph = activity.average_speed ? (activity.average_speed * 2.237).toFixed(1) : null;
+      const maxSpeedMph = activity.max_speed ? (activity.max_speed * 2.237).toFixed(1) : null;
+      const pace = activity.distance > 0 ? ((activity.moving_time / 60) / (activity.distance / 1000 * 0.621371)).toFixed(2) : null;
+
+      let detailsHTML = `
+        <div class="detail-item">
+          <div class="label">Distance</div>
+          <div class="value">${distanceMi} <span class="unit">mi</span></div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Duration</div>
+          <div class="value">${formatDuration(activity.moving_time)}</div>
+        </div>
+      `;
+
+      if (activity.type === 'Run' || activity.type === 'Walk' || activity.type === 'Hike') {
+        detailsHTML += `
+          <div class="detail-item">
+            <div class="label">Avg Pace</div>
+            <div class="value">${pace} <span class="unit">min/mi</span></div>
+          </div>
+        `;
+      }
+
+      if (avgSpeedMph) {
+        detailsHTML += `
+          <div class="detail-item">
+            <div class="label">Avg Speed</div>
+            <div class="value">${avgSpeedMph} <span class="unit">mph</span></div>
+          </div>
+        `;
+      }
+
+      if (maxSpeedMph) {
+        detailsHTML += `
+          <div class="detail-item">
+            <div class="label">Max Speed</div>
+            <div class="value">${maxSpeedMph} <span class="unit">mph</span></div>
+          </div>
+        `;
+      }
+
+      if (elevationFt) {
+        detailsHTML += `
+          <div class="detail-item">
+            <div class="label">Elevation Gain</div>
+            <div class="value">${elevationFt.toLocaleString()} <span class="unit">ft</span></div>
+          </div>
+        `;
+      }
+
+      if (activity.average_heartrate) {
+        detailsHTML += `
+          <div class="detail-item">
+            <div class="label">Avg Heart Rate</div>
+            <div class="value">${Math.round(activity.average_heartrate)} <span class="unit">bpm</span></div>
+          </div>
+        `;
+      }
+
+      if (activity.max_heartrate) {
+        detailsHTML += `
+          <div class="detail-item">
+            <div class="label">Max Heart Rate</div>
+            <div class="value">${Math.round(activity.max_heartrate)} <span class="unit">bpm</span></div>
+          </div>
+        `;
+      }
+
+      if (activity.average_watts) {
+        detailsHTML += `
+          <div class="detail-item">
+            <div class="label">Avg Power</div>
+            <div class="value">${Math.round(activity.average_watts)} <span class="unit">W</span></div>
+          </div>
+        `;
+      }
+
+      if (activity.kilojoules) {
+        detailsHTML += `
+          <div class="detail-item">
+            <div class="label">Energy</div>
+            <div class="value">${Math.round(activity.kilojoules)} <span class="unit">kJ</span></div>
+          </div>
+        `;
+      }
+
+      if (activity.suffer_score) {
+        detailsHTML += `
+          <div class="detail-item">
+            <div class="label">Suffer Score</div>
+            <div class="value">${activity.suffer_score}</div>
+          </div>
+        `;
+      }
+
+      details.innerHTML = detailsHTML;
+      modal.classList.add('active');
+    }
+
+    function renderActivitiesWithHighlight(highlightDate) {
+      const list = document.getElementById('activity-list');
+
+      if (!stravaData.activities || !stravaData.activities.length) {
+        list.innerHTML = '<div class="empty-state"><div class="icon">🏃</div><p>No recent activities</p></div>';
+        return;
+      }
+
+      // Sort activities to show highlighted date first
+      const sorted = [...stravaData.activities].sort((a, b) => {
+        const aDate = a.start_date_local.split('T')[0];
+        const bDate = b.start_date_local.split('T')[0];
+        if (aDate === highlightDate && bDate !== highlightDate) return -1;
+        if (bDate === highlightDate && aDate !== highlightDate) return 1;
+        return new Date(b.start_date_local) - new Date(a.start_date_local);
+      });
+
+      list.innerHTML = sorted.slice(0, 15).map((activity, index) => {
+        const actDate = activity.start_date_local.split('T')[0];
+        const isHighlighted = actDate === highlightDate;
+        const date = new Date(activity.start_date_local).toLocaleDateString('en-US', {
+          weekday: 'short', month: 'short', day: 'numeric'
+        });
+        const distanceKm = activity.distance / 1000;
+        const distanceMi = distanceKm * 0.621371;
+        const duration = Math.floor(activity.moving_time / 60);
+        const type = activity.type;
+
+        const avgSpeedMph = activity.average_speed ? (activity.average_speed * 2.237).toFixed(1) : null;
+        const maxSpeedMph = activity.max_speed ? (activity.max_speed * 2.237).toFixed(1) : null;
+        const pace = distanceMi > 0 ? ((activity.moving_time / 60) / distanceMi).toFixed(1) : '--';
+        const elevationFt = activity.total_elevation_gain ? Math.round(activity.total_elevation_gain * 3.28084) : null;
+        const avgHR = activity.average_heartrate ? Math.round(activity.average_heartrate) : null;
+        const maxHR = activity.max_heartrate ? Math.round(activity.max_heartrate) : null;
+        const avgPower = activity.average_watts ? Math.round(activity.average_watts) : null;
+
+        let statsLine = '';
+        if (type === 'Run' || type === 'Walk' || type === 'Hike') {
+          statsLine = `${pace} min/mi`;
+          if (elevationFt) statsLine += ` • ${elevationFt} ft`;
+        } else if (type === 'Ride' || type === 'VirtualRide') {
+          statsLine = `${avgSpeedMph} mph avg`;
+          if (maxSpeedMph) statsLine += ` / ${maxSpeedMph} max`;
+          if (elevationFt) statsLine += ` • ${elevationFt} ft`;
+          if (avgPower) statsLine += ` • ${avgPower}W`;
+        } else {
+          if (avgSpeedMph) statsLine = `${avgSpeedMph} mph`;
+        }
+
+        let hrLine = '';
+        if (avgHR && maxHR) {
+          hrLine = `${avgHR} / ${maxHR} bpm`;
+        } else if (avgHR) {
+          hrLine = `${avgHR} bpm avg`;
+        }
+
+        return `
+          <div class="activity-item${isHighlighted ? ' highlighted' : ''}" onclick="showActivityDetail(stravaData.activities.find(a => a.id === ${activity.id}))" style="${isHighlighted ? 'background: #eef2ff; border-color: #667eea;' : ''}">
+            <div class="activity-info">
+              <h3>${activity.name}</h3>
+              <p>${type} • ${date}${hrLine ? ' • ' + hrLine : ''}</p>
+            </div>
+            <div class="activity-stats">
+              <div class="distance">${distanceMi.toFixed(1)} mi</div>
+              <div class="time">${duration} min${statsLine ? ' • ' + statsLine : ''}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
 
     // Connect Strava
     async function connectStrava() {
@@ -1106,74 +1635,9 @@
       return 'poor';
     }
 
-    // Render Activities List
+    // Render Activities List (now uses the enhanced version with click handlers)
     function renderActivities() {
-      const list = document.getElementById('activity-list');
-
-      if (!stravaData.activities || !stravaData.activities.length) {
-        list.innerHTML = '<div class="empty-state"><div class="icon">🏃</div><p>No recent activities</p></div>';
-        return;
-      }
-
-      list.innerHTML = stravaData.activities.slice(0, 12).map(activity => {
-        const date = new Date(activity.start_date_local).toLocaleDateString('en-US', {
-          weekday: 'short', month: 'short', day: 'numeric'
-        });
-        const distanceKm = activity.distance / 1000;
-        const distanceMi = distanceKm * 0.621371;
-        const duration = Math.floor(activity.moving_time / 60);
-        const type = activity.type;
-
-        // Pace in min/mi (for runs) or speed in mph (for rides)
-        const avgSpeedMph = activity.average_speed ? (activity.average_speed * 2.237).toFixed(1) : null;
-        const maxSpeedMph = activity.max_speed ? (activity.max_speed * 2.237).toFixed(1) : null;
-        const pace = distanceMi > 0 ? ((activity.moving_time / 60) / distanceMi).toFixed(1) : '--';
-
-        // Elevation in feet
-        const elevationFt = activity.total_elevation_gain ? Math.round(activity.total_elevation_gain * 3.28084) : null;
-
-        // Heart rate
-        const avgHR = activity.average_heartrate ? Math.round(activity.average_heartrate) : null;
-        const maxHR = activity.max_heartrate ? Math.round(activity.max_heartrate) : null;
-
-        // Power (for cycling with power meter)
-        const avgPower = activity.average_watts ? Math.round(activity.average_watts) : null;
-
-        // Build stats line based on activity type
-        let statsLine = '';
-        if (type === 'Run' || type === 'Walk' || type === 'Hike') {
-          statsLine = `${pace} min/mi`;
-          if (elevationFt) statsLine += ` • ${elevationFt} ft`;
-        } else if (type === 'Ride' || type === 'VirtualRide') {
-          statsLine = `${avgSpeedMph} mph avg`;
-          if (maxSpeedMph) statsLine += ` / ${maxSpeedMph} max`;
-          if (elevationFt) statsLine += ` • ${elevationFt} ft`;
-          if (avgPower) statsLine += ` • ${avgPower}W`;
-        } else {
-          if (avgSpeedMph) statsLine = `${avgSpeedMph} mph`;
-        }
-
-        // Heart rate line
-        let hrLine = '';
-        if (avgHR && maxHR) {
-          hrLine = `${avgHR} / ${maxHR} bpm`;
-        } else if (avgHR) {
-          hrLine = `${avgHR} bpm avg`;
-        }
-
-        return `
-          <div class="activity-item">
-            <div class="activity-info">
-              <h3>${activity.name}</h3>
-              <p>${type} • ${date}${hrLine ? ' • ' + hrLine : ''}</p>
-            </div>
-            <div class="activity-stats">
-              <div class="distance">${distanceMi.toFixed(1)} mi</div>
-              <div class="time">${duration} min${statsLine ? ' • ' + statsLine : ''}</div>
-            </div>
-          </div>
-        `;
-      }).join('');
+      renderActivitiesWithHighlight(formatDateForInput(selectedDate));
     }
 
     // Render Sleep Chart
