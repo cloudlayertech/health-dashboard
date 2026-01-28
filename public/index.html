@@ -728,7 +728,7 @@
       </div>
       <div class="summary-card">
         <div class="label">Weekly Distance</div>
-        <div class="value" id="weekly-distance">--<span class="unit">km</span></div>
+        <div class="value" id="weekly-distance">--<span class="unit">mi</span></div>
         <div class="trend neutral" id="distance-trend">Connect Strava</div>
       </div>
       <div class="summary-card">
@@ -1199,8 +1199,9 @@
         new Date(a.start_date_local) >= weekAgo
       );
 
-      const totalDistance = weeklyActivities.reduce((sum, a) => sum + a.distance, 0) / 1000;
-      document.getElementById('weekly-distance').innerHTML = totalDistance.toFixed(1) + '<span class="unit"> km</span>';
+      const totalDistanceKm = weeklyActivities.reduce((sum, a) => sum + a.distance, 0) / 1000;
+      const totalDistance = totalDistanceKm * 0.621371; // Convert to miles
+      document.getElementById('weekly-distance').innerHTML = totalDistance.toFixed(1) + '<span class="unit"> mi</span>';
       document.getElementById('weekly-activities').textContent = weeklyActivities.length;
 
       // Calculate vs previous week
@@ -1211,7 +1212,8 @@
         return date >= twoWeeksAgo && date < weekAgo;
       });
 
-      const prevDistance = prevWeekActivities.reduce((sum, a) => sum + a.distance, 0) / 1000;
+      const prevDistanceKm = prevWeekActivities.reduce((sum, a) => sum + a.distance, 0) / 1000;
+      const prevDistance = prevDistanceKm * 0.621371; // Convert to miles
       const distanceDiff = totalDistance - prevDistance;
       const distanceTrend = document.getElementById('distance-trend');
 
@@ -1293,13 +1295,15 @@
         new Date(a.start_date_local) >= weekAgo
       );
 
-      const totalDistance = weeklyActivities.reduce((sum, a) => sum + a.distance, 0) / 1000;
+      const totalDistanceKm = weeklyActivities.reduce((sum, a) => sum + a.distance, 0) / 1000;
+      const totalDistance = totalDistanceKm * 0.621371; // Convert to miles
       const totalTime = weeklyActivities.reduce((sum, a) => sum + a.moving_time, 0);
-      const totalElevation = weeklyActivities.reduce((sum, a) => sum + (a.total_elevation_gain || 0), 0);
+      const totalElevationM = weeklyActivities.reduce((sum, a) => sum + (a.total_elevation_gain || 0), 0);
+      const totalElevation = totalElevationM * 3.28084; // Convert to feet
 
-      document.getElementById('strava-week-distance').textContent = totalDistance.toFixed(1) + ' km';
+      document.getElementById('strava-week-distance').textContent = totalDistance.toFixed(1) + ' mi';
       document.getElementById('strava-week-time').textContent = formatDuration(totalTime);
-      document.getElementById('strava-week-elevation').textContent = Math.round(totalElevation) + ' m';
+      document.getElementById('strava-week-elevation').textContent = Math.round(totalElevation).toLocaleString() + ' ft';
 
       // Average HR
       const activitiesWithHR = weeklyActivities.filter(a => a.average_heartrate);
@@ -1311,7 +1315,8 @@
       // Longest activity
       if (weeklyActivities.length) {
         const longest = weeklyActivities.reduce((max, a) => a.distance > max.distance ? a : max);
-        document.getElementById('strava-longest').textContent = (longest.distance / 1000).toFixed(1) + ' km';
+        const longestMiles = (longest.distance / 1000) * 0.621371;
+        document.getElementById('strava-longest').textContent = longestMiles.toFixed(1) + ' mi';
       }
 
       // Activity types
@@ -1364,10 +1369,12 @@
         const date = new Date(activity.start_date_local).toLocaleDateString('en-US', {
           weekday: 'short', month: 'short', day: 'numeric'
         });
-        const distance = (activity.distance / 1000).toFixed(1);
+        const distanceKm = activity.distance / 1000;
+        const distanceMi = distanceKm * 0.621371;
         const duration = Math.floor(activity.moving_time / 60);
         const type = activity.type;
-        const pace = activity.distance > 0 ? ((activity.moving_time / 60) / (activity.distance / 1000)).toFixed(1) : '--';
+        // Pace in min/mi
+        const pace = distanceMi > 0 ? ((activity.moving_time / 60) / distanceMi).toFixed(1) : '--';
 
         return `
           <div class="activity-item">
@@ -1376,8 +1383,8 @@
               <p>${type} • ${date}${activity.average_heartrate ? ' • ' + Math.round(activity.average_heartrate) + ' bpm avg' : ''}</p>
             </div>
             <div class="activity-stats">
-              <div class="distance">${distance} km</div>
-              <div class="time">${duration} min${type === 'Run' ? ' • ' + pace + ' min/km' : ''}</div>
+              <div class="distance">${distanceMi.toFixed(1)} mi</div>
+              <div class="time">${duration} min${type === 'Run' ? ' • ' + pace + ' min/mi' : ''}</div>
             </div>
           </div>
         `;
@@ -1546,7 +1553,8 @@
         if (!weeks[key]) {
           weeks[key] = { distance: 0, duration: 0, count: 0 };
         }
-        weeks[key].distance += a.distance / 1000;
+        // Convert km to miles
+        weeks[key].distance += (a.distance / 1000) * 0.621371;
         weeks[key].duration += a.moving_time / 3600;
         weeks[key].count++;
       });
@@ -1565,7 +1573,7 @@
             return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
           }),
           datasets: [{
-            label: 'Distance (km)',
+            label: 'Distance (mi)',
             data: sortedWeeks.map(([, data]) => data.distance.toFixed(1)),
             backgroundColor: 'rgba(102, 126, 234, 0.8)',
             borderRadius: 6
