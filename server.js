@@ -129,10 +129,11 @@ app.get('/api/strava/athlete', async (req, res) => {
 // Oura OAuth callback
 app.get('/callback/oura', async (req, res) => {
   const { code, error: ouraError } = req.query;
-  const baseUrl = getBaseUrl(req);
+
+  // Use hardcoded URL for Render deployment
+  const OURA_REDIRECT_URI = process.env.OURA_REDIRECT_URI || 'https://health-dashboard-1-73zv.onrender.com/callback/oura';
 
   console.log('Oura callback received. Code:', code ? 'present' : 'missing', 'Error:', ouraError || 'none');
-  console.log('Base URL detected:', baseUrl);
 
   if (ouraError) {
     console.error('Oura authorization denied:', ouraError);
@@ -145,8 +146,7 @@ app.get('/callback/oura', async (req, res) => {
   }
 
   try {
-    const redirectUri = `${baseUrl}/callback/oura`;
-    console.log('Token exchange with redirect_uri:', redirectUri);
+    console.log('Token exchange with redirect_uri:', OURA_REDIRECT_URI);
 
     // Oura requires form-urlencoded data
     const params = new URLSearchParams();
@@ -154,7 +154,7 @@ app.get('/callback/oura', async (req, res) => {
     params.append('code', code);
     params.append('client_id', process.env.OURA_CLIENT_ID);
     params.append('client_secret', process.env.OURA_CLIENT_SECRET);
-    params.append('redirect_uri', redirectUri);
+    params.append('redirect_uri', OURA_REDIRECT_URI);
 
     const response = await axios.post('https://api.ouraring.com/oauth/token', params, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
@@ -173,8 +173,9 @@ app.get('/callback/oura', async (req, res) => {
 
 // Get Oura auth URL
 app.get('/api/oura/auth-url', (req, res) => {
-  const baseUrl = getBaseUrl(req);
-  const authUrl = `https://cloud.ouraring.com/oauth/authorize?client_id=${process.env.OURA_CLIENT_ID}&redirect_uri=${baseUrl}/callback/oura&response_type=code&scope=daily%20heartrate%20personal%20session%20workout`;
+  // Use hardcoded URL for Render deployment
+  const OURA_REDIRECT_URI = process.env.OURA_REDIRECT_URI || 'https://health-dashboard-1-73zv.onrender.com/callback/oura';
+  const authUrl = `https://cloud.ouraring.com/oauth/authorize?client_id=${process.env.OURA_CLIENT_ID}&redirect_uri=${encodeURIComponent(OURA_REDIRECT_URI)}&response_type=code&scope=daily%20heartrate%20personal%20session%20workout`;
   res.json({ url: authUrl });
 });
 
