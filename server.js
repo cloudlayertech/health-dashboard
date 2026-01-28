@@ -175,7 +175,8 @@ app.get('/callback/oura', async (req, res) => {
 app.get('/api/oura/auth-url', (req, res) => {
   // Use hardcoded URL for Render deployment
   const OURA_REDIRECT_URI = process.env.OURA_REDIRECT_URI || 'https://health-dashboard-1-73zv.onrender.com/callback/oura';
-  const authUrl = `https://cloud.ouraring.com/oauth/authorize?client_id=${process.env.OURA_CLIENT_ID}&redirect_uri=${encodeURIComponent(OURA_REDIRECT_URI)}&response_type=code&scope=daily%20heartrate%20personal%20session%20workout`;
+  // Scopes should use + as separator per Oura docs
+  const authUrl = `https://cloud.ouraring.com/oauth/authorize?client_id=${process.env.OURA_CLIENT_ID}&redirect_uri=${encodeURIComponent(OURA_REDIRECT_URI)}&response_type=code&scope=daily+heartrate+personal+session+workout`;
   res.json({ url: authUrl });
 });
 
