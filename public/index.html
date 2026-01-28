@@ -1123,18 +1123,53 @@
         const distanceMi = distanceKm * 0.621371;
         const duration = Math.floor(activity.moving_time / 60);
         const type = activity.type;
-        // Pace in min/mi
+
+        // Pace in min/mi (for runs) or speed in mph (for rides)
+        const avgSpeedMph = activity.average_speed ? (activity.average_speed * 2.237).toFixed(1) : null;
+        const maxSpeedMph = activity.max_speed ? (activity.max_speed * 2.237).toFixed(1) : null;
         const pace = distanceMi > 0 ? ((activity.moving_time / 60) / distanceMi).toFixed(1) : '--';
+
+        // Elevation in feet
+        const elevationFt = activity.total_elevation_gain ? Math.round(activity.total_elevation_gain * 3.28084) : null;
+
+        // Heart rate
+        const avgHR = activity.average_heartrate ? Math.round(activity.average_heartrate) : null;
+        const maxHR = activity.max_heartrate ? Math.round(activity.max_heartrate) : null;
+
+        // Power (for cycling with power meter)
+        const avgPower = activity.average_watts ? Math.round(activity.average_watts) : null;
+
+        // Build stats line based on activity type
+        let statsLine = '';
+        if (type === 'Run' || type === 'Walk' || type === 'Hike') {
+          statsLine = `${pace} min/mi`;
+          if (elevationFt) statsLine += ` • ${elevationFt} ft`;
+        } else if (type === 'Ride' || type === 'VirtualRide') {
+          statsLine = `${avgSpeedMph} mph avg`;
+          if (maxSpeedMph) statsLine += ` / ${maxSpeedMph} max`;
+          if (elevationFt) statsLine += ` • ${elevationFt} ft`;
+          if (avgPower) statsLine += ` • ${avgPower}W`;
+        } else {
+          if (avgSpeedMph) statsLine = `${avgSpeedMph} mph`;
+        }
+
+        // Heart rate line
+        let hrLine = '';
+        if (avgHR && maxHR) {
+          hrLine = `${avgHR} / ${maxHR} bpm`;
+        } else if (avgHR) {
+          hrLine = `${avgHR} bpm avg`;
+        }
 
         return `
           <div class="activity-item">
             <div class="activity-info">
               <h3>${activity.name}</h3>
-              <p>${type} • ${date}${activity.average_heartrate ? ' • ' + Math.round(activity.average_heartrate) + ' bpm avg' : ''}</p>
+              <p>${type} • ${date}${hrLine ? ' • ' + hrLine : ''}</p>
             </div>
             <div class="activity-stats">
               <div class="distance">${distanceMi.toFixed(1)} mi</div>
-              <div class="time">${duration} min${type === 'Run' ? ' • ' + pace + ' min/mi' : ''}</div>
+              <div class="time">${duration} min${statsLine ? ' • ' + statsLine : ''}</div>
             </div>
           </div>
         `;
