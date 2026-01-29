@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Health Dashboard - Oura + Strava</title>
+  <title>Vitals - Unified Health Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%2300d4aa'/><stop offset='100%25' style='stop-color:%23667eea'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23g)'/><text x='50' y='62' font-size='40' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'>V</text></svg>">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-primary: #0d0d0f;
@@ -67,6 +68,171 @@
       color: var(--text-primary);
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Animated Mesh Gradient Background */
+    .bg-mesh {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .bg-mesh .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.15;
+      animation: float 20s ease-in-out infinite;
+    }
+
+    [data-theme="light"] .bg-mesh .orb {
+      opacity: 0.08;
+    }
+
+    .bg-mesh .orb-1 {
+      width: 600px;
+      height: 600px;
+      background: var(--accent-primary);
+      top: -200px;
+      right: -200px;
+      animation-delay: 0s;
+    }
+
+    .bg-mesh .orb-2 {
+      width: 500px;
+      height: 500px;
+      background: var(--accent-secondary);
+      bottom: -150px;
+      left: -150px;
+      animation-delay: -7s;
+    }
+
+    .bg-mesh .orb-3 {
+      width: 400px;
+      height: 400px;
+      background: var(--accent-tertiary);
+      top: 40%;
+      left: 30%;
+      animation-delay: -14s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(30px, -40px) scale(1.05); }
+      50% { transform: translate(-20px, 20px) scale(0.95); }
+      75% { transform: translate(40px, 30px) scale(1.02); }
+    }
+
+    /* Top Navigation Bar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: rgba(13, 13, 15, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    [data-theme="light"] .navbar {
+      background: rgba(245, 247, 250, 0.85);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 212, 170, 0.3);
+    }
+
+    .nav-brand-text {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-brand-tag {
+      font-size: 0.6rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(0, 212, 170, 0.15);
+      color: var(--accent-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Glassmorphism Cards */
+    .glass {
+      background: rgba(31, 31, 36, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    [data-theme="light"] .glass {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    /* Animated Gradient Borders */
+    .glow-border {
+      position: relative;
+    }
+
+    .glow-border::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary), var(--accent-primary));
+      background-size: 300% 300%;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      animation: borderGlow 6s linear infinite;
+    }
+
+    .glow-border:hover::after {
+      opacity: 1;
+    }
+
+    @keyframes borderGlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     /* Loading Skeleton Animation */
@@ -127,8 +293,111 @@
     /* Header */
     header {
       text-align: center;
-      padding: 24px 16px 32px;
+      padding: 32px 16px 40px;
       position: relative;
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 48px 20px 56px;
+      position: relative;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      border-radius: 50px;
+      background: rgba(0, 212, 170, 0.1);
+      border: 1px solid rgba(0, 212, 170, 0.2);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent-primary);
+      margin-bottom: 20px;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .hero-badge .pulse-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-primary);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      animation: fadeIn 0.6s ease-out 0.1s both;
+    }
+
+    @media (min-width: 768px) {
+      .hero h1 { font-size: 3.5rem; }
+    }
+
+    .hero h1 .gradient-text {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 50%, var(--accent-tertiary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      max-width: 500px;
+      margin: 0 auto 32px;
+      line-height: 1.6;
+      animation: fadeIn 0.6s ease-out 0.2s both;
+    }
+
+    @media (min-width: 768px) {
+      .hero-subtitle { font-size: 1.2rem; }
+    }
+
+    .hero-features {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+      animation: fadeIn 0.6s ease-out 0.3s both;
+    }
+
+    .hero-feature {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .hero-feature-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+    }
+
+    .hero-feature-icon.green { background: rgba(16, 185, 129, 0.15); }
+    .hero-feature-icon.blue { background: rgba(102, 126, 234, 0.15); }
+    .hero-feature-icon.pink { background: rgba(236, 72, 153, 0.15); }
+
+    .hero-divider {
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 2px;
+      margin: 32px auto;
     }
 
     /* Theme Toggle */
@@ -378,16 +647,23 @@
     }
 
     .score-ring-card {
-      background: var(--bg-card);
+      background: rgba(31, 31, 36, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-radius: var(--radius-xl);
       padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255,255,255,0.06);
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
       overflow: hidden;
+    }
+
+    [data-theme="light"] .score-ring-card {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(0,0,0,0.06);
     }
 
     .score-ring-card::before {
@@ -403,9 +679,13 @@
     }
 
     .score-ring-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow);
-      border-color: var(--accent-primary);
+      transform: translateY(-6px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      border-color: rgba(0, 212, 170, 0.3);
+    }
+
+    [data-theme="light"] .score-ring-card:hover {
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
     }
 
     .score-ring-card:hover::before {
@@ -1160,12 +1440,206 @@
       color: var(--text-secondary);
     }
 
+    /* Footer */
+    .footer {
+      margin-top: 48px;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .footer-logo {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 0.85rem;
+      color: white;
+    }
+
+    .footer-brand-name {
+      font-size: 1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .footer-tagline {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-bottom: 20px;
+    }
+
+    .footer-features {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .footer-feature {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .footer-feature .check {
+      color: var(--accent-primary);
+      font-weight: 700;
+    }
+
+    .footer-copy {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+    }
+
+    /* Section Headers */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .section-header h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .section-header .badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(102, 126, 234, 0.15);
+      color: var(--accent-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Status badges - enhanced */
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 50px;
+      background: rgba(31, 31, 36, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    [data-theme="light"] .status-badge {
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Card enhancements */
+    .card {
+      background: rgba(31, 31, 36, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: var(--radius-xl);
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: all 0.3s ease;
+    }
+
+    [data-theme="light"] .card {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    /* Quick stats - enhanced */
+    .quick-stat {
+      background: rgba(31, 31, 36, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: all 0.3s ease;
+    }
+
+    [data-theme="light"] .quick-stat {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    /* Metric cards - enhanced */
+    .metric-card {
+      background: rgba(31, 31, 36, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: all 0.3s ease;
+    }
+
+    [data-theme="light"] .metric-card {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    /* Insight cards - enhanced */
+    .insight-card {
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    /* Weekly heatmap - enhanced */
+    .weekly-heatmap {
+      background: linear-gradient(135deg, rgba(31, 31, 36, 0.7) 0%, rgba(26, 26, 31, 0.5) 100%);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    [data-theme="light"] .weekly-heatmap {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(237, 240, 245, 0.6) 100%);
+    }
+
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+  <!-- Animated Background -->
+  <div class="bg-mesh">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div class="nav-logo">V</div>
+      <span class="nav-brand-text">Vitals</span>
+      <span class="nav-brand-tag">Beta</span>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme" style="position:static;width:38px;height:38px;">
         <svg class="moon-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
         </svg>
@@ -1181,9 +1655,34 @@
           <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </button>
-      <h1>Health Dashboard</h1>
-      <p>Oura Ring + Strava unified view</p>
-    </header>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Hero Section -->
+    <div class="hero">
+      <div class="hero-badge">
+        <span class="pulse-dot"></span>
+        Live Health Tracking
+      </div>
+      <h1>Your health data,<br><span class="gradient-text">unified & beautiful.</span></h1>
+      <p class="hero-subtitle">Connect your Oura Ring and Strava to get a complete picture of your sleep, recovery, and training in one dashboard.</p>
+      <div class="hero-features">
+        <div class="hero-feature">
+          <span class="hero-feature-icon green">&#10003;</span>
+          Sleep & Recovery
+        </div>
+        <div class="hero-feature">
+          <span class="hero-feature-icon blue">&#10003;</span>
+          HRV & Heart Rate
+        </div>
+        <div class="hero-feature">
+          <span class="hero-feature-icon pink">&#10003;</span>
+          Training Load
+        </div>
+      </div>
+      <div class="hero-divider"></div>
+    </div>
 
     <div class="connection-status">
       <div class="status-badge disconnected" id="strava-status">
@@ -1514,6 +2013,22 @@
         </div>
       </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-brand">
+        <div class="footer-logo">V</div>
+        <span class="footer-brand-name">Vitals</span>
+      </div>
+      <p class="footer-tagline">Your unified health intelligence platform</p>
+      <div class="footer-features">
+        <div class="footer-feature"><span class="check">&#10003;</span> Oura Ring Integration</div>
+        <div class="footer-feature"><span class="check">&#10003;</span> Strava Sync</div>
+        <div class="footer-feature"><span class="check">&#10003;</span> Real-time Insights</div>
+        <div class="footer-feature"><span class="check">&#10003;</span> Trend Analysis</div>
+      </div>
+      <p class="footer-copy">&copy; 2026 Vitals. All rights reserved.</p>
+    </footer>
 
   </div>
 
