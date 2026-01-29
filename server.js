@@ -57,7 +57,7 @@ app.get('/callback/strava', async (req, res) => {
     stravaTokens.access_token = response.data.access_token;
     stravaTokens.refresh_token = response.data.refresh_token;
     console.log('Strava connected! Scopes:', response.data.scope);
-    console.log('\n=== STRAVA TOKENS (add these to Render environment variables) ===');
+    console.log('\n=== STRAVA TOKENS (add these to environment variables) ===');
     console.log('STRAVA_ACCESS_TOKEN=' + response.data.access_token);
     console.log('STRAVA_REFRESH_TOKEN=' + response.data.refresh_token);
     console.log('===============================================================\n');
@@ -139,8 +139,8 @@ app.get('/api/strava/athlete', async (req, res) => {
 app.get('/callback/oura', async (req, res) => {
   const { code, error: ouraError } = req.query;
 
-  // Use hardcoded URL for Render deployment
-  const OURA_REDIRECT_URI = process.env.OURA_REDIRECT_URI || 'https://health-dashboard-1-73zv.onrender.com/callback/oura';
+  const baseUrl = getBaseUrl(req);
+  const OURA_REDIRECT_URI = process.env.OURA_REDIRECT_URI || `${baseUrl}/callback/oura`;
 
   console.log('Oura callback received. Code:', code ? 'present' : 'missing', 'Error:', ouraError || 'none');
 
@@ -172,7 +172,7 @@ app.get('/callback/oura', async (req, res) => {
     ouraTokens.access_token = response.data.access_token;
     ouraTokens.refresh_token = response.data.refresh_token;
     console.log('Oura connected successfully!');
-    console.log('\n=== OURA TOKENS (add these to Render environment variables) ===');
+    console.log('\n=== OURA TOKENS (add these to environment variables) ===');
     console.log('OURA_ACCESS_TOKEN=' + response.data.access_token);
     console.log('OURA_REFRESH_TOKEN=' + response.data.refresh_token);
     console.log('==============================================================\n');
@@ -186,8 +186,8 @@ app.get('/callback/oura', async (req, res) => {
 
 // Get Oura auth URL
 app.get('/api/oura/auth-url', (req, res) => {
-  // Use hardcoded URL for Render deployment
-  const OURA_REDIRECT_URI = process.env.OURA_REDIRECT_URI || 'https://health-dashboard-1-73zv.onrender.com/callback/oura';
+  const baseUrl = getBaseUrl(req);
+  const OURA_REDIRECT_URI = process.env.OURA_REDIRECT_URI || `${baseUrl}/callback/oura`;
   // Scopes should use + as separator per Oura docs
   const authUrl = `https://cloud.ouraring.com/oauth/authorize?client_id=${process.env.OURA_CLIENT_ID}&redirect_uri=${encodeURIComponent(OURA_REDIRECT_URI)}&response_type=code&scope=daily+heartrate+personal+session+workout`;
   res.json({ url: authUrl });
