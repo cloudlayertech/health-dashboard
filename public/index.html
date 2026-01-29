@@ -85,40 +85,40 @@
     .bg-mesh .orb {
       position: absolute;
       border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.15;
-      animation: float 20s ease-in-out infinite;
+      filter: blur(120px);
+      opacity: 0.07;
+      animation: float 25s ease-in-out infinite;
     }
 
     [data-theme="light"] .bg-mesh .orb {
-      opacity: 0.08;
+      opacity: 0.04;
     }
 
     .bg-mesh .orb-1 {
-      width: 600px;
-      height: 600px;
-      background: var(--accent-primary);
-      top: -200px;
-      right: -200px;
+      width: 500px;
+      height: 500px;
+      background: #667eea;
+      top: -250px;
+      right: -100px;
       animation-delay: 0s;
     }
 
     .bg-mesh .orb-2 {
-      width: 500px;
-      height: 500px;
-      background: var(--accent-secondary);
-      bottom: -150px;
-      left: -150px;
-      animation-delay: -7s;
+      width: 400px;
+      height: 400px;
+      background: #ec4899;
+      bottom: -200px;
+      left: -100px;
+      animation-delay: -8s;
     }
 
     .bg-mesh .orb-3 {
-      width: 400px;
-      height: 400px;
-      background: var(--accent-tertiary);
-      top: 40%;
-      left: 30%;
-      animation-delay: -14s;
+      width: 350px;
+      height: 350px;
+      background: #00d4aa;
+      top: 50%;
+      left: 50%;
+      animation-delay: -16s;
     }
 
     @keyframes float {
@@ -133,9 +133,9 @@
       position: sticky;
       top: 0;
       z-index: 200;
-      background: rgba(13, 13, 15, 0.8);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: rgba(13, 13, 15, 0.92);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
       border-bottom: 1px solid var(--border);
       padding: 12px 24px;
       display: flex;
@@ -144,7 +144,7 @@
     }
 
     [data-theme="light"] .navbar {
-      background: rgba(245, 247, 250, 0.85);
+      background: rgba(245, 247, 250, 0.92);
     }
 
     .nav-brand {
@@ -194,46 +194,7 @@
       gap: 12px;
     }
 
-    /* Glassmorphism Cards */
-    .glass {
-      background: rgba(31, 31, 36, 0.6);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,0.06);
-    }
-
-    [data-theme="light"] .glass {
-      background: rgba(255, 255, 255, 0.7);
-      border: 1px solid rgba(0,0,0,0.06);
-    }
-
-    /* Animated Gradient Borders */
-    .glow-border {
-      position: relative;
-    }
-
-    .glow-border::after {
-      content: '';
-      position: absolute;
-      inset: -1px;
-      border-radius: inherit;
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary), var(--accent-primary));
-      background-size: 300% 300%;
-      z-index: -1;
-      opacity: 0;
-      transition: opacity 0.4s ease;
-      animation: borderGlow 6s linear infinite;
-    }
-
-    .glow-border:hover::after {
-      opacity: 1;
-    }
-
-    @keyframes borderGlow {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+    /* Removed glassmorphism and glow-border - using solid backgrounds for clarity */
 
     /* Loading Skeleton Animation */
     @keyframes shimmer {
@@ -647,23 +608,16 @@
     }
 
     .score-ring-card {
-      background: rgba(31, 31, 36, 0.6);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: var(--bg-card);
       border-radius: var(--radius-xl);
-      padding: 20px;
+      padding: 24px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      border: 1px solid rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
       overflow: hidden;
-    }
-
-    [data-theme="light"] .score-ring-card {
-      background: rgba(255, 255, 255, 0.7);
-      border: 1px solid rgba(0,0,0,0.06);
     }
 
     .score-ring-card::before {
@@ -673,24 +627,28 @@
       left: 0;
       right: 0;
       height: 3px;
-      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
-      opacity: 0;
-      transition: opacity 0.3s;
+      opacity: 1;
     }
+
+    .score-ring-card:nth-child(1)::before { background: linear-gradient(90deg, #00d4aa, #00b894); }
+    .score-ring-card:nth-child(2)::before { background: linear-gradient(90deg, #667eea, #764ba2); }
+    .score-ring-card:nth-child(3)::before { background: linear-gradient(90deg, #ec4899, #f43f5e); }
+    .score-ring-card:nth-child(4)::before { background: linear-gradient(90deg, #ef4444, #f97316); }
+
+    .score-ring-card:nth-child(1) { border-bottom: 1px solid rgba(0, 212, 170, 0.15); }
+    .score-ring-card:nth-child(2) { border-bottom: 1px solid rgba(102, 126, 234, 0.15); }
+    .score-ring-card:nth-child(3) { border-bottom: 1px solid rgba(236, 72, 153, 0.15); }
+    .score-ring-card:nth-child(4) { border-bottom: 1px solid rgba(239, 68, 68, 0.15); }
 
     .score-ring-card:hover {
       transform: translateY(-6px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-      border-color: rgba(0, 212, 170, 0.3);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.25);
     }
 
-    [data-theme="light"] .score-ring-card:hover {
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-    }
-
-    .score-ring-card:hover::before {
-      opacity: 1;
-    }
+    .score-ring-card:nth-child(1):hover { border-color: rgba(0, 212, 170, 0.3); box-shadow: 0 16px 40px rgba(0, 212, 170, 0.08); }
+    .score-ring-card:nth-child(2):hover { border-color: rgba(102, 126, 234, 0.3); box-shadow: 0 16px 40px rgba(102, 126, 234, 0.08); }
+    .score-ring-card:nth-child(3):hover { border-color: rgba(236, 72, 153, 0.3); box-shadow: 0 16px 40px rgba(236, 72, 153, 0.08); }
+    .score-ring-card:nth-child(4):hover { border-color: rgba(239, 68, 68, 0.3); box-shadow: 0 16px 40px rgba(239, 68, 68, 0.08); }
 
     .score-ring-container {
       position: relative;
@@ -769,7 +727,7 @@
 
     /* Weekly Overview - Premium Design */
     .weekly-heatmap {
-      background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+      background: var(--bg-card);
       border-radius: var(--radius-xl);
       padding: 24px;
       margin-bottom: 24px;
@@ -978,9 +936,8 @@
     }
 
     .quick-stat .stat-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text-primary);
+      font-size: 1.6rem;
+      font-weight: 800;
     }
 
     .quick-stat .stat-unit {
@@ -1004,31 +961,7 @@
       }
     }
 
-    .card {
-      background: var(--bg-card);
-      border-radius: var(--radius-xl);
-      padding: 20px;
-      border: 1px solid var(--border);
-      transition: all 0.3s ease;
-    }
-
-    .card:hover {
-      border-color: rgba(255,255,255,0.12);
-    }
-
-    .card h2 {
-      font-size: 0.9rem;
-      font-weight: 600;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--text-primary);
-    }
-
-    .card h2 .icon {
-      font-size: 1.1rem;
-    }
+    /* Card base styles are in the enhanced section below */
 
     /* Charts */
     .chart-container {
@@ -1065,34 +998,81 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 14px 16px;
+      padding: 16px 18px;
       border-radius: var(--radius-md);
       background: var(--bg-elevated);
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       border: 1px solid transparent;
-      transition: all 0.2s ease;
+      transition: all 0.25s ease;
       cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .activity-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--accent-secondary);
+      border-radius: 0 4px 4px 0;
+      opacity: 0;
+      transition: opacity 0.2s;
     }
 
     .activity-item:hover {
       transform: translateX(4px);
-      background: rgba(102, 126, 234, 0.1);
-      border-color: var(--accent-secondary);
+      background: rgba(102, 126, 234, 0.08);
+      border-color: rgba(102, 126, 234, 0.2);
+    }
+
+    .activity-item:hover::before {
+      opacity: 1;
     }
 
     .activity-item.highlighted {
-      background: rgba(0, 212, 170, 0.1);
-      border-color: var(--accent-primary);
+      background: rgba(0, 212, 170, 0.08);
+      border-color: rgba(0, 212, 170, 0.2);
     }
 
-    .activity-info h3 {
+    .activity-item.highlighted::before {
+      opacity: 1;
+      background: var(--accent-primary);
+    }
+
+    .activity-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .activity-type-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .activity-type-icon.run { background: rgba(0, 212, 170, 0.15); }
+    .activity-type-icon.ride { background: rgba(102, 126, 234, 0.15); }
+    .activity-type-icon.swim { background: rgba(59, 130, 246, 0.15); }
+    .activity-type-icon.walk { background: rgba(245, 158, 11, 0.15); }
+    .activity-type-icon.other { background: rgba(168, 85, 247, 0.15); }
+
+    .activity-info-text h3 {
       font-size: 0.9rem;
       font-weight: 600;
       margin-bottom: 4px;
       color: var(--text-primary);
     }
 
-    .activity-info p {
+    .activity-info-text p {
       color: var(--text-muted);
       font-size: 0.75rem;
     }
@@ -1102,14 +1082,15 @@
     }
 
     .activity-stats .distance {
-      font-size: 1rem;
+      font-size: 1.1rem;
       font-weight: 700;
       color: var(--accent-primary);
     }
 
     .activity-stats .time {
       color: var(--text-muted);
-      font-size: 0.7rem;
+      font-size: 0.72rem;
+      margin-top: 2px;
     }
 
     /* Metrics Section */
@@ -1537,88 +1518,95 @@
     }
 
     /* Status badges - enhanced */
-    .status-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 18px;
-      border-radius: 50px;
-      background: rgba(31, 31, 36, 0.6);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--border);
-      font-size: 0.85rem;
-      font-weight: 500;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    [data-theme="light"] .status-badge {
-      background: rgba(255, 255, 255, 0.7);
-    }
 
     /* Card enhancements */
     .card {
-      background: rgba(31, 31, 36, 0.6);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: var(--bg-card);
       border-radius: var(--radius-xl);
-      padding: 20px;
-      border: 1px solid rgba(255,255,255,0.06);
+      padding: 24px;
+      border: 1px solid var(--border);
       transition: all 0.3s ease;
+      position: relative;
     }
 
-    [data-theme="light"] .card {
-      background: rgba(255, 255, 255, 0.7);
-      border: 1px solid rgba(0,0,0,0.06);
+    .card:hover {
+      border-color: rgba(102, 126, 234, 0.2);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
     }
 
-    /* Quick stats - enhanced */
+    .card h2 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-primary);
+    }
+
+    .card h2 .card-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .card h2 .card-icon.sleep { background: rgba(102, 126, 234, 0.15); }
+    .card h2 .card-icon.readiness { background: rgba(0, 212, 170, 0.15); }
+    .card h2 .card-icon.hrv { background: rgba(236, 72, 153, 0.15); }
+    .card h2 .card-icon.training { background: rgba(249, 115, 22, 0.15); }
+    .card h2 .card-icon.activities { background: rgba(59, 130, 246, 0.15); }
+
+    /* Quick stats - enhanced with color accents */
     .quick-stat {
-      background: rgba(31, 31, 36, 0.6);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: var(--bg-card);
       border-radius: var(--radius-lg);
-      padding: 16px;
-      border: 1px solid rgba(255,255,255,0.06);
+      padding: 20px;
+      border: 1px solid var(--border);
       transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
 
-    [data-theme="light"] .quick-stat {
-      background: rgba(255, 255, 255, 0.7);
-      border: 1px solid rgba(0,0,0,0.06);
+    .quick-stat::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+    }
+
+    .quick-stat:nth-child(1)::before { background: var(--accent-primary); }
+    .quick-stat:nth-child(2)::before { background: var(--accent-secondary); }
+    .quick-stat:nth-child(3)::before { background: var(--accent-tertiary); }
+    .quick-stat:nth-child(4)::before { background: var(--warning); }
+
+    .quick-stat:nth-child(1) .stat-value { color: var(--accent-primary); }
+    .quick-stat:nth-child(2) .stat-value { color: var(--accent-secondary); }
+    .quick-stat:nth-child(3) .stat-value { color: var(--accent-tertiary); }
+    .quick-stat:nth-child(4) .stat-value { color: var(--warning); }
+
+    .quick-stat:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     }
 
     /* Metric cards - enhanced */
     .metric-card {
-      background: rgba(31, 31, 36, 0.6);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: var(--bg-card);
       border-radius: var(--radius-lg);
-      padding: 18px;
-      border: 1px solid rgba(255,255,255,0.06);
+      padding: 20px;
+      border: 1px solid var(--border);
       transition: all 0.3s ease;
     }
 
-    [data-theme="light"] .metric-card {
-      background: rgba(255, 255, 255, 0.7);
-      border: 1px solid rgba(0,0,0,0.06);
-    }
-
-    /* Insight cards - enhanced */
-    .insight-card {
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-    }
-
-    /* Weekly heatmap - enhanced */
-    .weekly-heatmap {
-      background: linear-gradient(135deg, rgba(31, 31, 36, 0.7) 0%, rgba(26, 26, 31, 0.5) 100%);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-    }
-
-    [data-theme="light"] .weekly-heatmap {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(237, 240, 245, 0.6) 100%);
+    .metric-card:hover {
+      border-color: var(--accent-secondary);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     }
 
   </style>
@@ -1837,7 +1825,7 @@
     <div class="dashboard-grid">
       <!-- Sleep Chart -->
       <div class="card">
-        <h2><span class="icon">Sleep Score</span></h2>
+        <h2><span class="card-icon sleep">&#x1F4A4;</span> Sleep Score</h2>
         <div class="chart-container">
           <canvas id="sleep-chart"></canvas>
         </div>
@@ -1845,7 +1833,7 @@
 
       <!-- Readiness Chart -->
       <div class="card">
-        <h2><span class="icon">Readiness Score</span></h2>
+        <h2><span class="card-icon readiness">&#x26A1;</span> Readiness Score</h2>
         <div class="chart-container">
           <canvas id="readiness-chart"></canvas>
         </div>
@@ -1853,7 +1841,7 @@
 
       <!-- HRV Chart -->
       <div class="card">
-        <h2><span class="icon">HRV Trend</span></h2>
+        <h2><span class="card-icon hrv">&#x2764;</span> HRV Trend</h2>
         <div class="chart-container">
           <canvas id="hrv-chart"></canvas>
         </div>
@@ -1861,7 +1849,7 @@
 
       <!-- Activity Chart -->
       <div class="card">
-        <h2><span class="icon">Training Load</span></h2>
+        <h2><span class="card-icon training">&#x1F3CB;</span> Training Load</h2>
         <div class="chart-container">
           <canvas id="activity-chart"></canvas>
         </div>
@@ -1869,7 +1857,7 @@
 
       <!-- Recent Activities -->
       <div class="card full-width">
-        <h2><span class="icon">Recent Activities</span></h2>
+        <h2><span class="card-icon activities">&#x1F3C3;</span> Recent Activities</h2>
         <div class="activity-list" id="activity-list">
           <div class="loading">
             <div class="loading-spinner"></div>
@@ -2487,15 +2475,25 @@
           hrLine = ` • ${avgHR}/${maxHR} bpm`;
         }
 
+        let typeIcon = '&#x1F3C3;';
+        let typeClass = 'other';
+        if (type === 'Run' || type === 'TrailRun') { typeIcon = '&#x1F3C3;'; typeClass = 'run'; }
+        else if (type === 'Ride' || type === 'VirtualRide' || type === 'EBikeRide') { typeIcon = '&#x1F6B4;'; typeClass = 'ride'; }
+        else if (type === 'Swim') { typeIcon = '&#x1F3CA;'; typeClass = 'swim'; }
+        else if (type === 'Walk' || type === 'Hike') { typeIcon = '&#x1F6B6;'; typeClass = 'walk'; }
+
         return `
           <div class="activity-item ${isHighlighted ? 'highlighted' : ''}" onclick="showActivityDetail(stravaData.activities.find(a => a.id === ${activity.id}))">
             <div class="activity-info">
-              <h3>${activity.name}</h3>
-              <p>${type} • ${date}${hrLine}</p>
+              <div class="activity-type-icon ${typeClass}">${typeIcon}</div>
+              <div class="activity-info-text">
+                <h3>${activity.name}</h3>
+                <p>${type} &bull; ${date}${hrLine}</p>
+              </div>
             </div>
             <div class="activity-stats">
               <div class="distance">${distanceMi.toFixed(1)} mi</div>
-              <div class="time">${duration} min${statsLine ? ' • ' + statsLine : ''}</div>
+              <div class="time">${duration} min${statsLine ? ' &bull; ' + statsLine : ''}</div>
             </div>
           </div>
         `;
